@@ -6,25 +6,34 @@ Reusable AI-agent skill for publishing and editing Agent Case Share tasks, artic
 
 ### Codex
 
-Install or load this repository as a Codex plugin, or copy the skill directly:
+Add this repository as a marketplace:
 
 ```bash
-cp -R skills/publish-agent-case-share ~/.codex/skills/
+codex plugin marketplace add parkerluxu/agent-case-share-skill
+```
+
+Then install `agent-case-share-skill` from the Codex plugins UI.
+
+Or copy the skill directly:
+
+```bash
+cp -R plugins/agent-case-share-skill/skills/publish-agent-case-share ~/.codex/skills/
 ```
 
 ### Claude Code
 
-Load the repository as a plugin:
+Add this repository as a marketplace:
 
 ```bash
-claude --plugin-dir .
+/plugin marketplace add parkerluxu/agent-case-share-skill
+/plugin install agent-case-share-skill@agent-case-share
 ```
 
 Or copy the skill directly:
 
 ```bash
 mkdir -p ~/.claude/skills
-cp -R skills/publish-agent-case-share ~/.claude/skills/
+cp -R plugins/agent-case-share-skill/skills/publish-agent-case-share ~/.claude/skills/
 ```
 
 ### Gemini CLI

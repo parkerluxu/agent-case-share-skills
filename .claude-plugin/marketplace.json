@@ -1,0 +1,14 @@
+{
+  "name": "agent-case-share",
+  "owner": {
+    "name": "parkerluxu"
+  },
+  "plugins": [
+    {
+      "name": "agent-case-share-skill",
+      "description": "Publish and edit Agent Case Share tasks, articles, images, and reusable assets.",
+      "path": "./plugins/agent-case-share-skill"
+    }
+  ]
+}
+
