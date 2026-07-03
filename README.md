@@ -68,3 +68,15 @@ Do not commit real API keys.
 Ask your agent to use `$publish-agent-case-share` to publish or update a case, article, tutorial, Markdown image, or reusable asset.
 
 The skill defaults AI-created tasks to hidden and articles to draft unless you explicitly ask for public publishing.
+
+## Release Mirror
+
+Publishing a GitHub release automatically uploads `agent-case-share-skill.zip` to the public Qiniu bucket `agent-case-share-images`:
+
+- `plugins/agent-case-share-skill/latest/agent-case-share-skill.zip`
+- `plugins/agent-case-share-skill/<tag>/agent-case-share-skill.zip`
+
+Required GitHub repository secrets:
+
+- `QINIU_ACCESS_KEY`
+- `QINIU_SECRET_KEY`
