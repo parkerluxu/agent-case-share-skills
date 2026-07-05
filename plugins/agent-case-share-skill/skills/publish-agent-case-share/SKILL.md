@@ -55,6 +55,8 @@ For a task/case:
 
 - `title`: concise case title
 - `summary`: short business problem and agent result
+- `categorySlug`: choose a visible industry category slug from `/api/categories`; use the default category table in `references/api.md` when live discovery is unavailable
+- `industry`: optional display name fallback; prefer matching the selected category name
 - `visibility`: default `HIDDEN`; use `PUBLISHED` only when requested
 - `coverImage`: optional case cover URL, recommended ratio 7:4
 - `tags`: comma-separated tags

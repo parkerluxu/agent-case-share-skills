@@ -1,6 +1,6 @@
 {
   "name": "agent-case-share-skill",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Search, read, publish, and edit Agent Case Share content.",
   "contextFileName": "GEMINI.md",
   "settings": [

@@ -9,7 +9,7 @@ const bucket = process.env.QINIU_BUCKET?.trim();
 const tag = process.env.RELEASE_TAG?.trim();
 
 if (!filePath || !accessKey || !secretKey || !bucket || !tag) {
-  throw new Error("Usage: RELEASE_TAG=v0.2.2 node scripts/upload-release-to-qiniu.mjs <zip>");
+  throw new Error("Usage: RELEASE_TAG=v0.2.3 node scripts/upload-release-to-qiniu.mjs <zip>");
 }
 
 const fileName = path.basename(filePath);

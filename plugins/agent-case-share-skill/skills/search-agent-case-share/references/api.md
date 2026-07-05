@@ -23,8 +23,8 @@ Returns visible categories:
   "items": [
     {
       "id": "category-id",
-      "name": "Customer Service",
-      "slug": "customer-service",
+      "name": "销售与客户服务",
+      "slug": "customer-service-operations",
       "description": "",
       "sortOrder": 10,
       "updatedAt": "2026-07-05T00:00:00.000Z"
@@ -32,6 +32,33 @@ Returns visible categories:
   ]
 }
 ```
+
+Default industry categories commonly available on Agent Case Share:
+
+| Name | Slug |
+| --- | --- |
+| 电子信息与硬件 | `electronics-hardware` |
+| 软件与互联网 | `web-development` |
+| 智能制造 | `supply-chain-manufacturing` |
+| 金融与财税 | `finance-accounting` |
+| 医疗与健康 | `healthcare` |
+| 教育与培训 | `education-training` |
+| 零售与电商 | `retail-ecommerce` |
+| 内容与传媒 | `content-creation` |
+| 政务与公共服务 | `government-public-services` |
+| 企业服务与办公 | `enterprise-service-office` |
+| 销售与客户服务 | `customer-service-operations` |
+| 市场与增长 | `marketing` |
+| 研发与 IT | `rd-it` |
+| 数据与经营分析 | `data-analysis` |
+| 法务与合规 | `legal-compliance` |
+| 人力资源 | `human-resources` |
+| 科研与学术 | `research` |
+| 个人效率与生活 | `personal-productivity-life` |
+| 通用自动化 | `general-automation` |
+| 其他 | `other` |
+
+Prefer live `/api/categories` data when available, because admins can add, hide, or rename categories. Use these slugs as stable defaults for filtering.
 
 ## Tags
 
@@ -63,7 +90,7 @@ Returns:
 ## Unified Search
 
 ```http
-GET /api/search?q=agent&type=task&category=customer-service&tag=automation&limit=10
+GET /api/search?q=agent&type=task&category=customer-service-operations&tag=automation&limit=10
 ```
 
 Parameters:
@@ -96,7 +123,7 @@ Returns lightweight results:
 ## Task List
 
 ```http
-GET /api/tasks?q=agent&category=customer-service&tag=automation&status=PUBLISHED&limit=10&page=1
+GET /api/tasks?q=agent&category=customer-service-operations&tag=automation&status=PUBLISHED&limit=10&page=1
 ```
 
 Parameters:
@@ -119,11 +146,11 @@ Returns card fields only, not long body text:
       "slug": "support-review-agent",
       "url": "/tasks/support-review-agent",
       "summary": "Short summary...",
-      "industry": "Customer Service",
+      "industry": "销售与客户服务",
       "difficulty": "BEGINNER",
       "agentStack": "Next.js, OpenAI",
       "status": "PUBLISHED",
-      "category": { "id": "category-id", "name": "Customer Service", "slug": "customer-service" },
+      "category": { "id": "category-id", "name": "销售与客户服务", "slug": "customer-service-operations" },
       "tags": [{ "id": "tag-id", "name": "Automation", "slug": "automation" }],
       "counts": { "articles": 1, "repositories": 1, "reusableAssets": 1 },
       "updatedAt": "2026-07-05T00:00:00.000Z"

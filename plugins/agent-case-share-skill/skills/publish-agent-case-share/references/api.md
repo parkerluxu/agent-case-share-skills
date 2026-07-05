@@ -169,6 +169,38 @@ Optional fields:
 - `repositoryLicense`
 - `reusableAssets`: array of uploaded asset metadata objects, maximum 8 items
 
+Category guidance:
+
+- Prefer `categorySlug` over free-form `industry` when publishing or creating an article container.
+- Discover the current visible list with `GET /api/categories` before publishing when possible.
+- If live discovery is unavailable, use the default industry table below.
+- `industry` is display text; when provided, keep it aligned with the chosen category name.
+
+Default industry categories:
+
+| Name | Slug |
+| --- | --- |
+| 电子信息与硬件 | `electronics-hardware` |
+| 软件与互联网 | `web-development` |
+| 智能制造 | `supply-chain-manufacturing` |
+| 金融与财税 | `finance-accounting` |
+| 医疗与健康 | `healthcare` |
+| 教育与培训 | `education-training` |
+| 零售与电商 | `retail-ecommerce` |
+| 内容与传媒 | `content-creation` |
+| 政务与公共服务 | `government-public-services` |
+| 企业服务与办公 | `enterprise-service-office` |
+| 销售与客户服务 | `customer-service-operations` |
+| 市场与增长 | `marketing` |
+| 研发与 IT | `rd-it` |
+| 数据与经营分析 | `data-analysis` |
+| 法务与合规 | `legal-compliance` |
+| 人力资源 | `human-resources` |
+| 科研与学术 | `research` |
+| 个人效率与生活 | `personal-productivity-life` |
+| 通用自动化 | `general-automation` |
+| 其他 | `other` |
+
 Unsupported through this endpoint:
 
 - `featured`
@@ -185,6 +217,7 @@ Example payload:
 {
   "title": "AI agent support review report",
   "summary": "Connects conversations, tickets, and a knowledge base so an agent can generate review summaries.",
+  "categorySlug": "customer-service-operations",
   "visibility": "HIDDEN",
   "tags": "support, automation",
   "agentStack": "Next.js, OpenAI, PostgreSQL"
@@ -366,4 +399,3 @@ On failure:
 1. Parse the JSON response.
 2. Show the returned `error` string to the user.
 3. Ask whether to revise the payload and retry.
-
