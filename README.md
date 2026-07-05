@@ -1,6 +1,6 @@
 # Agent Case Share Skill
 
-Reusable AI-agent skill for publishing and editing Agent Case Share tasks, articles, Markdown images, and reusable assets.
+Reusable AI-agent skills for searching, reading, publishing, and editing Agent Case Share content.
 
 ## Install
 
@@ -18,6 +18,7 @@ Or copy the skill directly:
 
 ```bash
 cp -R plugins/agent-case-share-skill/skills/publish-agent-case-share ~/.codex/skills/
+cp -R plugins/agent-case-share-skill/skills/search-agent-case-share ~/.codex/skills/
 ```
 
 ### Claude Code
@@ -34,6 +35,7 @@ Or copy the skill directly:
 ```bash
 mkdir -p ~/.claude/skills
 cp -R plugins/agent-case-share-skill/skills/publish-agent-case-share ~/.claude/skills/
+cp -R plugins/agent-case-share-skill/skills/search-agent-case-share ~/.claude/skills/
 ```
 
 ### Gemini CLI
@@ -50,9 +52,11 @@ For local development:
 gemini extensions link .
 ```
 
-## Required Secrets
+## Optional Secrets
 
-Create a personal API key from your Agent Case Share `/profile` page.
+Search and read APIs work without a key for published content.
+
+Create a personal API key from your Agent Case Share `/profile` page when publishing content or reading hidden/draft content.
 
 Use these environment variables in your shell or agent runtime:
 
@@ -64,6 +68,8 @@ AGENT_CASE_SHARE_API_KEY=acsp_live_replace_me
 Do not commit real API keys.
 
 ## Usage
+
+Ask your agent to use `$search-agent-case-share` to search categories, tags, cases, articles, news, projects, papers, or Markdown article content.
 
 Ask your agent to use `$publish-agent-case-share` to publish or update a case, article, tutorial, Markdown image, or reusable asset.
 

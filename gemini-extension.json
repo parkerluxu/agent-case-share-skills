@@ -1,7 +1,7 @@
 {
   "name": "agent-case-share-skill",
   "version": "0.1.0",
-  "description": "Publish and edit Agent Case Share tasks, articles, images, and reusable assets.",
+  "description": "Search, read, publish, and edit Agent Case Share content.",
   "contextFileName": "GEMINI.md",
   "settings": [
     {
@@ -18,4 +18,3 @@
     }
   ]
 }
-
