@@ -45,6 +45,7 @@ Default industry categories commonly available on Agent Case Share:
 | 教育与培训 | `education-training` |
 | 零售与电商 | `retail-ecommerce` |
 | 内容与传媒 | `content-creation` |
+| 创意艺术与设计 | `creative-arts-design` |
 | 政务与公共服务 | `government-public-services` |
 | 企业服务与办公 | `enterprise-service-office` |
 | 销售与客户服务 | `customer-service-operations` |
@@ -59,6 +60,10 @@ Default industry categories commonly available on Agent Case Share:
 | 其他 | `other` |
 
 Prefer live `/api/categories` data when available, because admins can add, hide, or rename categories. Use these slugs as stable defaults for filtering.
+
+Known category descriptions:
+
+- `creative-arts-design`: 面向艺术、设计、创意内容和 AIGC 创作工作流的 AI Agent 案例。
 
 ## Tags
 

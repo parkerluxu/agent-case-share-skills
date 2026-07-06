@@ -188,6 +188,7 @@ Default industry categories:
 | 教育与培训 | `education-training` |
 | 零售与电商 | `retail-ecommerce` |
 | 内容与传媒 | `content-creation` |
+| 创意艺术与设计 | `creative-arts-design` |
 | 政务与公共服务 | `government-public-services` |
 | 企业服务与办公 | `enterprise-service-office` |
 | 销售与客户服务 | `customer-service-operations` |
@@ -200,6 +201,10 @@ Default industry categories:
 | 个人效率与生活 | `personal-productivity-life` |
 | 通用自动化 | `general-automation` |
 | 其他 | `other` |
+
+Known category descriptions:
+
+- `creative-arts-design`: 面向艺术、设计、创意内容和 AIGC 创作工作流的 AI Agent 案例。
 
 Unsupported through this endpoint:
 
