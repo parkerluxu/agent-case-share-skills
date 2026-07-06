@@ -61,9 +61,10 @@ Create a personal API key from your Agent Case Share `/profile` page when publis
 Use these environment variables in your shell or agent runtime:
 
 ```bash
-AGENT_CASE_SHARE_BASE_URL=https://your-domain.com
 AGENT_CASE_SHARE_API_KEY=acsp_live_replace_me
 ```
+
+The base URL defaults to `https://agentcaseshare.cn/`. Set `AGENT_CASE_SHARE_BASE_URL` only when targeting a different Agent Case Share deployment.
 
 Do not commit real API keys.
 
