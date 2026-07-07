@@ -72,7 +72,7 @@ Do not commit real API keys.
 
 ## Usage
 
-Ask your agent to use `$search-agent-case-share` to search categories, tags, cases, articles, news, projects, papers, or Markdown article content.
+Ask your agent to use `$search-agent-case-share` to search categories, tags, cases, articles, news, projects, papers, or Markdown article content, and to read case, project, paper, or article details by URL or slug.
 
 Ask your agent to use `$search-agent-case-share-personal` to search your own Agent Case Share cases and reusable assets with a personal API key.
 

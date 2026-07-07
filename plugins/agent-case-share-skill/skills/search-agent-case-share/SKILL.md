@@ -44,13 +44,17 @@ For endpoint parameters, response shapes, and examples, read:
    - Case list/filtering -> `GET /api/tasks`
    - Case detail -> `GET /api/tasks/:slug`
    - Article Markdown -> `GET /api/articles/:slug`
+   - Project detail -> `GET /api/projects/:slug`
+   - Paper detail -> `GET /api/papers/:slug`
    - Public asset list/filtering -> `GET /api/assets`
 3. If the user provides a site URL, infer the slug and endpoint:
    - `/tasks/:slug` -> `GET /api/tasks/:slug`
    - `/articles/:slug` -> `GET /api/articles/:slug`
+   - `/projects/:slug` -> `GET /api/projects/:slug`
+   - `/papers/:slug` -> `GET /api/papers/:slug`
    - `/assets/:id` -> use `GET /api/assets` with `q`/filters when no public detail endpoint is available
 4. Add `Authorization: Bearer <personal-api-key>` only for hidden or draft content.
-5. Fetch JSON and inspect `items`, `task`, or `article`.
+5. Fetch JSON and inspect `items`, `task`, `article`, `project`, or `paper`.
 6. For summaries, preserve source links using each returned `url`.
 7. If a query is broad, start with `limit=10`; broaden only when needed.
 8. If the API returns `404`, report that the content was not found or not visible to the current credentials.
@@ -62,4 +66,6 @@ For endpoint parameters, response shapes, and examples, read:
 - Use `type` on `/api/search` only when the user asks for one content type.
 - Use `/api/tasks/:slug` before `/api/articles/:slug` when the user wants the full case context.
 - Use `/api/articles/:slug` when the user specifically needs Markdown content for rewriting, syncing, or summarizing.
+- Use `/api/projects/:slug` when the user needs the full open-source project description, repo/site/tutorial URLs, quality score, or tags.
+- Use `/api/papers/:slug` when the user needs full paper metadata, links, DOI, keywords, notes, quality score, or tags.
 - Use `/api/assets` for public asset discovery across the site.

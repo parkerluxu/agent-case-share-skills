@@ -241,6 +241,76 @@ Returns article metadata and Markdown body:
 }
 ```
 
+## Project Detail
+
+```http
+GET /api/projects/:slug
+```
+
+Returns one open-source project detail record. Published projects are public. Draft or hidden projects require an admin signed-in session or an admin personal API key.
+
+```json
+{
+  "project": {
+    "id": "project-id",
+    "name": "Open-source agent framework",
+    "slug": "open-source-agent-framework",
+    "url": "/projects/open-source-agent-framework",
+    "summary": "Short project summary...",
+    "description": "Longer project description...",
+    "repoUrl": "https://github.com/example/agent-framework",
+    "websiteUrl": "https://example.com",
+    "tutorialUrl": "https://example.com/tutorial",
+    "techStack": "TypeScript, Python",
+    "maturity": "Production-ready",
+    "license": "MIT",
+    "status": "PUBLISHED",
+    "featured": false,
+    "qualityScore": 4,
+    "likeCount": 12,
+    "category": { "id": "category-id", "name": "AI Agents", "slug": "ai-agents" },
+    "tags": [{ "id": "tag-id", "name": "Agent", "slug": "agent" }],
+    "createdAt": "2026-07-07T00:00:00.000Z",
+    "updatedAt": "2026-07-07T00:00:00.000Z"
+  }
+}
+```
+
+## Paper Detail
+
+```http
+GET /api/papers/:slug
+```
+
+Returns one paper detail record. Published papers are public. Draft or hidden papers require an admin signed-in session or an admin personal API key.
+
+```json
+{
+  "paper": {
+    "id": "paper-id",
+    "title": "Agent Research Paper",
+    "slug": "agent-research-paper",
+    "url": "/papers/agent-research-paper",
+    "excerpt": "Short paper summary...",
+    "authors": "A. Researcher, B. Builder",
+    "year": 2026,
+    "paperUrl": "https://example.com/paper",
+    "pdfUrl": "https://example.com/paper.pdf",
+    "doi": "10.0000/example",
+    "keywords": "agents, evaluation",
+    "note": "Curator notes...",
+    "status": "PUBLISHED",
+    "featured": false,
+    "qualityScore": 4,
+    "likeCount": 8,
+    "category": { "id": "category-id", "name": "Research", "slug": "research" },
+    "tags": [{ "id": "tag-id", "name": "Evaluation", "slug": "evaluation" }],
+    "createdAt": "2026-07-07T00:00:00.000Z",
+    "updatedAt": "2026-07-07T00:00:00.000Z"
+  }
+}
+```
+
 ## Public Asset List
 
 ```http
