@@ -88,7 +88,6 @@ For editing an existing reusable asset:
 - Use `PATCH /api/assets/:id`.
 - Send only metadata fields that should change.
 - Editable fields: `title`, `type`, `summary`, `version`, `visibility` or `status`.
-- Admin-only editable field: `sourceType`.
 - This endpoint does not replace the uploaded file; upload a new asset if the binary content must change.
 
 For editing an existing task/case:

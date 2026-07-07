@@ -84,7 +84,6 @@ Form fields:
 - `version`: optional version label
 - `publishAsset`: optional boolean; omit or set false for a case-attached draft
 - `visibility`: ignored for draft mode
-- `sourceType`: ignored for draft mode
 
 Supported extensions:
 
@@ -136,7 +135,7 @@ POST /api/assets/user
 Content-Type: multipart/form-data
 ```
 
-Use this when the user wants to add an asset to their personal asset library independent of a case. The API creates a `ReusableAsset` record with `sourceType: "USER_UPLOAD"`.
+Use this when the user wants to add an asset to their personal asset library independent of a case. This is the preferred endpoint for normal users and AI agents. The asset is stored as a user-uploaded asset.
 
 Form fields:
 
@@ -177,7 +176,6 @@ Successful response:
     "id": "asset-id",
     "title": "Support Review Skill",
     "type": "SKILL",
-    "sourceType": "USER_UPLOAD",
     "summary": "Reusable support review skill",
     "version": "v1.0.0",
     "fileName": "support-review-skill.zip",
@@ -201,13 +199,12 @@ POST /api/assets
 Content-Type: multipart/form-data
 ```
 
-`POST /api/assets` can also create a standalone asset when `publishAsset=true` is included. Prefer `POST /api/assets/user` for ordinary user uploads, but use this compatibility path if a client only knows `/api/assets`.
+`POST /api/assets` can also create a standalone user asset when `publishAsset=true` is included. Prefer `POST /api/assets/user` for ordinary user uploads, but use this compatibility path if a client only knows `/api/assets`.
 
 Additional form fields:
 
 - `publishAsset`: set to `true`
 - `visibility`: optional enum, `PUBLISHED` or `HIDDEN`; send `HIDDEN` unless the user explicitly requests public publishing
-- `sourceType`: optional enum, `USER_UPLOAD`, `OPEN_SOURCE`, or `CASE_EXTRACTED`; regular users are forced to `USER_UPLOAD` unless they are admins
 
 curl example:
 
@@ -240,9 +237,6 @@ Permissions:
 
 - Asset authors can edit their own assets.
 - Authors of a linked case can edit assets attached to that case.
-- Admins can edit any asset.
-- Open-source assets can only be edited by admins.
-- `sourceType` can only be changed by admins.
 
 Optional fields:
 
@@ -252,7 +246,6 @@ Optional fields:
 - `version`: version label
 - `visibility`: one of `DRAFT`, `PUBLISHED`, `HIDDEN`
 - `status`: alias for `visibility`; one of `DRAFT`, `PUBLISHED`, `HIDDEN`
-- `sourceType`: admin-only; one of `OPEN_SOURCE`, `USER_UPLOAD`, `CASE_EXTRACTED`
 
 curl example:
 
@@ -275,7 +268,6 @@ Successful response:
     "id": "asset-id",
     "title": "Support Review Skill v2",
     "type": "SKILL",
-    "sourceType": "USER_UPLOAD",
     "summary": "Updated reuse notes.",
     "version": "v1.0.0",
     "fileName": "support-review-skill.zip",
@@ -563,7 +555,7 @@ Successful response:
 
 - `400`: required fields are missing, enum values are invalid, or JSON is malformed
 - `401`: API key is missing, invalid, or revoked
-- `403`: authenticated user cannot edit the requested task, article, or asset; non-admin attempted to edit open-source asset or `sourceType`
+- `403`: authenticated user cannot edit the requested task, article, or asset
 - `404`: task, article, asset, or slug does not exist, or is not editable by the current user
 
 On failure:

@@ -50,7 +50,6 @@ Returns:
       "excerpt": "Reusable support review workflow.",
       "status": "PUBLISHED",
       "assetType": "SKILL",
-      "sourceType": "USER_UPLOAD",
       "fileName": "support-review-skill.zip",
       "task": null,
       "updatedAt": "2026-07-07T00:00:00.000Z"
@@ -159,7 +158,7 @@ Returns one authenticated-user-owned case. This endpoint can return hidden or dr
 ## My Assets
 
 ```http
-GET /api/me/assets?q=skill&type=SKILL&source=USER_UPLOAD&status=PUBLISHED&limit=10&page=1
+GET /api/me/assets?q=skill&type=SKILL&status=PUBLISHED&limit=10&page=1
 ```
 
 Lists the authenticated user's own reusable assets. When `status` is omitted, published, hidden, and draft assets are included.
@@ -168,7 +167,6 @@ Parameters:
 
 - `q`: optional keyword; searches title, summary, file name, linked task title, and linked task summary
 - `type`: optional asset type, one of `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, `OTHER`
-- `source`: optional source type, one of `OPEN_SOURCE`, `USER_UPLOAD`, `CASE_EXTRACTED`
 - `status`: optional, one of `DRAFT`, `PUBLISHED`, `HIDDEN`
 - `limit`: optional, default 10, maximum 50
 - `page`: optional, default 1
@@ -182,7 +180,6 @@ Returns:
       "id": "asset-id",
       "title": "Support review skill",
       "type": "SKILL",
-      "sourceType": "USER_UPLOAD",
       "url": "/assets/asset-id",
       "downloadUrl": "/api/assets/asset-id/download",
       "summary": "Reusable support review workflow.",
@@ -218,7 +215,6 @@ Returns one authenticated-user-owned reusable asset.
     "id": "asset-id",
     "title": "Support review skill",
     "type": "SKILL",
-    "sourceType": "USER_UPLOAD",
     "url": "/assets/asset-id",
     "downloadUrl": "/api/assets/asset-id/download",
     "summary": "Reusable support review workflow.",

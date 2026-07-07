@@ -59,7 +59,7 @@ Default industry categories commonly available on Agent Case Share:
 | 通用自动化 | `general-automation` |
 | 其他 | `other` |
 
-Prefer live `/api/categories` data when available, because admins can add, hide, or rename categories. Use these slugs as stable defaults for filtering.
+Prefer live `/api/categories` data when available, because categories can change over time. Use these slugs as stable defaults for filtering.
 
 Known category descriptions:
 
@@ -244,16 +244,15 @@ Returns article metadata and Markdown body:
 ## Public Asset List
 
 ```http
-GET /api/assets?q=skill&type=SKILL&source=USER_UPLOAD&status=PUBLISHED&limit=10&page=1
+GET /api/assets?q=skill&type=SKILL&status=PUBLISHED&limit=10&page=1
 ```
 
-Use this to discover reusable assets across the public asset library. Published assets are public. `DRAFT` and `HIDDEN` require authorization and only return assets visible to the authenticated user or admin.
+Use this to discover reusable assets across the public asset library. Published assets are public. `DRAFT` and `HIDDEN` require authorization and only return assets visible to the authenticated user.
 
 Parameters:
 
 - `q`: optional keyword; searches title, summary, file name, linked task title, and linked task summary
 - `type`: optional asset type, one of `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, `OTHER`
-- `source`: optional source type, one of `OPEN_SOURCE`, `USER_UPLOAD`, `CASE_EXTRACTED`
 - `status`: optional, default `PUBLISHED`; `DRAFT` and `HIDDEN` require authorization
 - `limit`: optional, default 10, maximum 50
 - `page`: optional, default 1
@@ -267,7 +266,6 @@ Returns asset metadata, linked task context when present, and a download endpoin
       "id": "asset-id",
       "title": "Support review skill",
       "type": "SKILL",
-      "sourceType": "USER_UPLOAD",
       "url": "/assets/asset-id",
       "downloadUrl": "/api/assets/asset-id/download",
       "summary": "Reusable support review workflow.",
