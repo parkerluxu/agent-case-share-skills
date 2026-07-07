@@ -64,7 +64,7 @@ Successful response:
 
 Replace local Markdown image paths with the returned `url`, or insert the returned `markdown`.
 
-## Upload a Reusable Asset
+## Upload a Case-Attached Reusable Asset Draft
 
 Endpoint:
 
@@ -73,7 +73,7 @@ POST /api/assets
 Content-Type: multipart/form-data
 ```
 
-Use this before `POST /api/tasks` when a task should include reusable assets such as skills, prompts, workflows, templates, or MCP configs.
+Use this before `POST /api/tasks` when a task should include reusable assets such as skills, prompts, workflows, templates, or MCP configs. Without `publishAsset=true`, this endpoint only uploads the file and returns metadata that can be placed in a task `reusableAssets` array.
 
 Form fields:
 
@@ -82,6 +82,9 @@ Form fields:
 - `type`: required enum, one of `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, `OTHER`
 - `summary`: optional asset summary
 - `version`: optional version label
+- `publishAsset`: optional boolean; omit or set false for a case-attached draft
+- `visibility`: ignored for draft mode
+- `sourceType`: ignored for draft mode
 
 Supported extensions:
 
@@ -122,7 +125,171 @@ Successful response:
 }
 ```
 
-Use the returned `asset` object inside `reusableAssets`.
+Use the returned `asset` object inside `reusableAssets` when creating or editing a task. Do not use `POST /api/assets/user` for this path because task creation stores attached assets as case-scoped `CASE_EXTRACTED` records from draft metadata.
+
+## Upload a Standalone User Asset
+
+Endpoint:
+
+```http
+POST /api/assets/user
+Content-Type: multipart/form-data
+```
+
+Use this when the user wants to add an asset to their personal asset library independent of a case. The API creates a `ReusableAsset` record with `sourceType: "USER_UPLOAD"`.
+
+Form fields:
+
+- `file`: required file upload
+- `title`: required asset title
+- `type`: required enum, one of `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, `OTHER`
+- `summary`: optional asset summary
+- `version`: optional version label
+- `visibility`: optional enum, `PUBLISHED` or `HIDDEN`; API default is `PUBLISHED`, but AI agents should send `HIDDEN` unless the user explicitly requests public publishing
+
+Supported extensions:
+
+- `.zip`
+- `.md`
+- `.txt`
+- `.json`
+- `.yaml`
+- `.yml`
+
+curl example:
+
+```bash
+curl -X POST "$AGENT_CASE_SHARE_BASE_URL/api/assets/user" \
+  -H "Authorization: Bearer $AGENT_CASE_SHARE_API_KEY" \
+  -F "file=@./support-review-skill.zip" \
+  -F "title=Support Review Skill" \
+  -F "type=SKILL" \
+  -F "summary=Reusable support review skill" \
+  -F "version=v1.0.0" \
+  -F "visibility=HIDDEN"
+```
+
+Successful response:
+
+```json
+{
+  "asset": {
+    "id": "asset-id",
+    "title": "Support Review Skill",
+    "type": "SKILL",
+    "sourceType": "USER_UPLOAD",
+    "summary": "Reusable support review skill",
+    "version": "v1.0.0",
+    "fileName": "support-review-skill.zip",
+    "storageKey": "task-assets/user-id/uuid/support-review-skill.zip",
+    "mimeType": "application/zip",
+    "fileSize": 12345,
+    "fileHash": "qiniu-file-hash",
+    "status": "HIDDEN"
+  }
+}
+```
+
+Report `asset.id` after success. This response represents an independent asset record, not a draft object intended for `reusableAssets`.
+
+## Compatibility Standalone Asset Upload
+
+Endpoint:
+
+```http
+POST /api/assets
+Content-Type: multipart/form-data
+```
+
+`POST /api/assets` can also create a standalone asset when `publishAsset=true` is included. Prefer `POST /api/assets/user` for ordinary user uploads, but use this compatibility path if a client only knows `/api/assets`.
+
+Additional form fields:
+
+- `publishAsset`: set to `true`
+- `visibility`: optional enum, `PUBLISHED` or `HIDDEN`; send `HIDDEN` unless the user explicitly requests public publishing
+- `sourceType`: optional enum, `USER_UPLOAD`, `OPEN_SOURCE`, or `CASE_EXTRACTED`; regular users are forced to `USER_UPLOAD` unless they are admins
+
+curl example:
+
+```bash
+curl -X POST "$AGENT_CASE_SHARE_BASE_URL/api/assets" \
+  -H "Authorization: Bearer $AGENT_CASE_SHARE_API_KEY" \
+  -F "file=@./support-review-skill.zip" \
+  -F "title=Support Review Skill" \
+  -F "type=SKILL" \
+  -F "summary=Reusable support review skill" \
+  -F "version=v1.0.0" \
+  -F "publishAsset=true" \
+  -F "visibility=HIDDEN"
+```
+
+Successful response shape matches `POST /api/assets/user`.
+
+## Edit Asset Metadata
+
+Endpoint:
+
+```http
+PATCH /api/assets/:id
+Content-Type: application/json
+```
+
+Use this to edit metadata for an existing reusable asset. It does not replace the uploaded file.
+
+Permissions:
+
+- Asset authors can edit their own assets.
+- Authors of a linked case can edit assets attached to that case.
+- Admins can edit any asset.
+- Open-source assets can only be edited by admins.
+- `sourceType` can only be changed by admins.
+
+Optional fields:
+
+- `title`: asset title; empty strings are rejected
+- `type`: one of `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, `OTHER`
+- `summary`: asset summary
+- `version`: version label
+- `visibility`: one of `DRAFT`, `PUBLISHED`, `HIDDEN`
+- `status`: alias for `visibility`; one of `DRAFT`, `PUBLISHED`, `HIDDEN`
+- `sourceType`: admin-only; one of `OPEN_SOURCE`, `USER_UPLOAD`, `CASE_EXTRACTED`
+
+curl example:
+
+```bash
+curl -X PATCH "$AGENT_CASE_SHARE_BASE_URL/api/assets/asset-id" \
+  -H "Authorization: Bearer $AGENT_CASE_SHARE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Support Review Skill v2",
+    "summary": "Updated reuse notes.",
+    "visibility": "HIDDEN"
+  }'
+```
+
+Successful response:
+
+```json
+{
+  "asset": {
+    "id": "asset-id",
+    "title": "Support Review Skill v2",
+    "type": "SKILL",
+    "sourceType": "USER_UPLOAD",
+    "summary": "Updated reuse notes.",
+    "version": "v1.0.0",
+    "fileName": "support-review-skill.zip",
+    "mimeType": "application/zip",
+    "fileSize": 12345,
+    "downloadCount": 3,
+    "status": "HIDDEN",
+    "updatedAt": "2026-07-07T00:00:00.000Z",
+    "taskId": null,
+    "url": "/assets/asset-id",
+    "downloadUrl": "/api/assets/asset-id/download"
+  }
+}
+```
 
 ## Create a Task
 
@@ -396,8 +563,8 @@ Successful response:
 
 - `400`: required fields are missing, enum values are invalid, or JSON is malformed
 - `401`: API key is missing, invalid, or revoked
-- `403`: authenticated user cannot edit the requested task or article
-- `404`: task, article, or slug does not exist
+- `403`: authenticated user cannot edit the requested task, article, or asset; non-admin attempted to edit open-source asset or `sourceType`
+- `404`: task, article, asset, or slug does not exist, or is not editable by the current user
 
 On failure:
 

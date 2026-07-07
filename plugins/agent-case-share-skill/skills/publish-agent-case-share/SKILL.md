@@ -1,6 +1,6 @@
 ---
 name: publish-agent-case-share
-description: Publish or edit tasks/cases and articles/tutorials on Agent Case Share using HTTP APIs. Use when the user asks Codex, Claude Code, Gemini CLI, or another AI coding agent to upload, create, publish, draft, edit, update, revise, or sync Agent Case Share tasks, cases, tutorials, articles, Markdown images, or reusable assets.
+description: Publish or edit tasks/cases, articles/tutorials, Markdown images, and reusable assets on Agent Case Share using HTTP APIs. Use when the user asks Codex, Claude Code, Gemini CLI, or another AI coding agent to upload, create, publish, draft, edit, update, revise, or sync Agent Case Share tasks, cases, tutorials, articles, Markdown images, standalone user assets, case-attached reusable assets, or asset metadata.
 ---
 
 # Publish to Agent Case Share
@@ -15,6 +15,7 @@ Use this skill to publish content to the Agent Case Share platform.
 - Treat the API key as a secret. Do not print it, commit it, log it, or include it in generated files.
 - Default AI-generated tasks to `visibility: "HIDDEN"`.
 - Default AI-generated articles to `status: "DRAFT"`.
+- Default AI-generated standalone user assets to `visibility: "HIDDEN"`.
 - Only publish publicly when the user explicitly asks.
 
 ## Inputs
@@ -23,7 +24,7 @@ Confirm:
 
 - Base URL, default `https://agentcaseshare.cn/`
 - Personal API key generated from `/profile`
-- Whether the user wants to create or edit a task/case, article/tutorial, Markdown image, reusable asset, or a combination
+- Whether the user wants to create or edit a task/case, article/tutorial, Markdown image, case-attached reusable asset, standalone user asset, asset metadata, or a combination
 
 ## Reference
 
@@ -35,7 +36,10 @@ For endpoint fields, payload examples, responses, and error handling, read:
 
 1. Classify the request:
    - Markdown content image upload -> `POST /api/content-images`
-   - Reusable asset upload -> `POST /api/assets`
+   - Case-attached reusable asset draft -> `POST /api/assets`
+   - Standalone user asset upload -> `POST /api/assets/user`
+   - Compatibility standalone asset upload -> `POST /api/assets` with `publishAsset=true`
+   - Asset metadata editing -> `PATCH /api/assets/:id`
    - Case/task publishing -> `POST /api/tasks`
    - Case/task editing -> `PATCH /api/tasks/:slug`
    - Article/tutorial publishing -> `POST /api/articles`
@@ -45,9 +49,11 @@ For endpoint fields, payload examples, responses, and error handling, read:
 4. Resolve the base URL from `AGENT_CASE_SHARE_BASE_URL`, the user, or default to `https://agentcaseshare.cn/`.
 5. Use `Authorization: Bearer <personal-api-key>`.
 6. Use hidden/draft defaults unless the user requested public publishing.
-7. For reusable assets, upload files first and place returned `asset` objects into `reusableAssets` when creating or updating the task.
-8. After success, report returned `slug`, `url`, `taskSlug`, or `taskUrl`.
-9. On API failure, show the returned `error` message and ask whether to revise and retry.
+7. For assets that should appear on a case, upload files to `POST /api/assets` first and place returned draft `asset` objects into `reusableAssets` when creating or updating the task.
+8. For assets that should exist in the user's asset library independent of a case, upload files to `POST /api/assets/user` and report the returned `asset.id`.
+9. For editing existing asset metadata, send only fields that should change to `PATCH /api/assets/:id`; do not try to replace the uploaded file through this endpoint.
+10. After success, report returned `slug`, `url`, `taskSlug`, `taskUrl`, `asset.id`, or `asset.url`.
+11. On API failure, show the returned `error` message and ask whether to revise and retry.
 
 ## Content Mapping
 
@@ -64,6 +70,26 @@ For a task/case:
 - `problem`, `solution`, `workflow`, `impact`: map from the user's notes
 - `articleTitle`, `articleContent`: include when the user wants an initial recap article
 - `reusableAssets`: include asset objects returned by `POST /api/assets`
+
+For a standalone user asset:
+
+- Use `POST /api/assets/user`.
+- `file`: local file to upload
+- `title`: concise reusable asset title
+- `type`: one of `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, `OTHER`
+- `summary`: optional reuse guidance
+- `version`: optional version label
+- `visibility`: default `HIDDEN`; use `PUBLISHED` only when requested
+- Do not put standalone user asset responses into a task's `reusableAssets`; use draft assets from `POST /api/assets` for case attachment.
+
+For editing an existing reusable asset:
+
+- Infer the asset `id` from `/assets/:id`, `/api/assets/:id/download`, a personal asset lookup, or the user's provided id.
+- Use `PATCH /api/assets/:id`.
+- Send only metadata fields that should change.
+- Editable fields: `title`, `type`, `summary`, `version`, `visibility` or `status`.
+- Admin-only editable field: `sourceType`.
+- This endpoint does not replace the uploaded file; upload a new asset if the binary content must change.
 
 For editing an existing task/case:
 
@@ -94,5 +120,6 @@ If the user says "publish publicly", "make it public", or gives an explicit prod
 
 - Task: `visibility: "PUBLISHED"` or edit with `status: "PUBLISHED"`
 - Article: `status: "PUBLISHED"`
+- Standalone user asset: `visibility: "PUBLISHED"`
 
 Otherwise keep AI-created content hidden/draft.

@@ -19,6 +19,7 @@ Or copy the skill directly:
 ```bash
 cp -R plugins/agent-case-share-skill/skills/publish-agent-case-share ~/.codex/skills/
 cp -R plugins/agent-case-share-skill/skills/search-agent-case-share ~/.codex/skills/
+cp -R plugins/agent-case-share-skill/skills/search-agent-case-share-personal ~/.codex/skills/
 ```
 
 ### Claude Code
@@ -36,6 +37,7 @@ Or copy the skill directly:
 mkdir -p ~/.claude/skills
 cp -R plugins/agent-case-share-skill/skills/publish-agent-case-share ~/.claude/skills/
 cp -R plugins/agent-case-share-skill/skills/search-agent-case-share ~/.claude/skills/
+cp -R plugins/agent-case-share-skill/skills/search-agent-case-share-personal ~/.claude/skills/
 ```
 
 ### Gemini CLI
@@ -72,7 +74,9 @@ Do not commit real API keys.
 
 Ask your agent to use `$search-agent-case-share` to search categories, tags, cases, articles, news, projects, papers, or Markdown article content.
 
-Ask your agent to use `$publish-agent-case-share` to publish or update a case, article, tutorial, Markdown image, or reusable asset.
+Ask your agent to use `$search-agent-case-share-personal` to search your own Agent Case Share cases and reusable assets with a personal API key.
+
+Ask your agent to use `$publish-agent-case-share` to publish or update a case, article, tutorial, Markdown image, reusable asset, or asset metadata.
 
 The skill defaults AI-created tasks to hidden and articles to draft unless you explicitly ask for public publishing.
 

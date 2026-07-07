@@ -241,6 +241,62 @@ Returns article metadata and Markdown body:
 }
 ```
 
+## Public Asset List
+
+```http
+GET /api/assets?q=skill&type=SKILL&source=USER_UPLOAD&status=PUBLISHED&limit=10&page=1
+```
+
+Use this to discover reusable assets across the public asset library. Published assets are public. `DRAFT` and `HIDDEN` require authorization and only return assets visible to the authenticated user or admin.
+
+Parameters:
+
+- `q`: optional keyword; searches title, summary, file name, linked task title, and linked task summary
+- `type`: optional asset type, one of `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, `OTHER`
+- `source`: optional source type, one of `OPEN_SOURCE`, `USER_UPLOAD`, `CASE_EXTRACTED`
+- `status`: optional, default `PUBLISHED`; `DRAFT` and `HIDDEN` require authorization
+- `limit`: optional, default 10, maximum 50
+- `page`: optional, default 1
+
+Returns asset metadata, linked task context when present, and a download endpoint:
+
+```json
+{
+  "items": [
+    {
+      "id": "asset-id",
+      "title": "Support review skill",
+      "type": "SKILL",
+      "sourceType": "USER_UPLOAD",
+      "url": "/assets/asset-id",
+      "downloadUrl": "/api/assets/asset-id/download",
+      "summary": "Reusable support review workflow.",
+      "version": "v1.0.0",
+      "fileName": "support-review-skill.zip",
+      "mimeType": "application/zip",
+      "fileSize": 12345,
+      "status": "PUBLISHED",
+      "downloadCount": 3,
+      "likeCount": 1,
+      "task": {
+        "id": "task-id",
+        "title": "Support review agent",
+        "slug": "support-review-agent",
+        "url": "/tasks/support-review-agent",
+        "summary": "Short summary...",
+        "industry": "Customer service",
+        "status": "PUBLISHED"
+      },
+      "updatedAt": "2026-07-07T00:00:00.000Z"
+    }
+  ],
+  "page": 1,
+  "limit": 10,
+  "total": 1,
+  "hasMore": false
+}
+```
+
 ## Error Handling
 
 - `400`: invalid query parameter such as `type` or `status`

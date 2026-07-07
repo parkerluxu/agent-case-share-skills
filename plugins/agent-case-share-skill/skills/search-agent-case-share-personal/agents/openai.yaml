@@ -1,0 +1,4 @@
+interface:
+  display_name: "Search My Agent Case Share"
+  short_description: "Search personal Agent Case Share cases and assets."
+  default_prompt: "Use $search-agent-case-share-personal to find my Agent Case Share cases and assets."

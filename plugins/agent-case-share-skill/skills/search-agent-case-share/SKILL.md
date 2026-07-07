@@ -20,7 +20,7 @@ Use this skill to treat Agent Case Share as a readable knowledge base.
 Confirm:
 
 - Base URL, default `https://agentcaseshare.cn/`
-- What to find or read: categories, tags, cases, articles, news, projects, papers, a specific slug, or a URL
+- What to find or read: categories, tags, cases, articles, news, projects, papers, assets, a specific slug/id, or a URL
 - Optional personal API key for private content
 
 Environment variables, when available:
@@ -44,9 +44,11 @@ For endpoint parameters, response shapes, and examples, read:
    - Case list/filtering -> `GET /api/tasks`
    - Case detail -> `GET /api/tasks/:slug`
    - Article Markdown -> `GET /api/articles/:slug`
+   - Public asset list/filtering -> `GET /api/assets`
 3. If the user provides a site URL, infer the slug and endpoint:
    - `/tasks/:slug` -> `GET /api/tasks/:slug`
    - `/articles/:slug` -> `GET /api/articles/:slug`
+   - `/assets/:id` -> use `GET /api/assets` with `q`/filters when no public detail endpoint is available
 4. Add `Authorization: Bearer <personal-api-key>` only for hidden or draft content.
 5. Fetch JSON and inspect `items`, `task`, or `article`.
 6. For summaries, preserve source links using each returned `url`.
@@ -60,3 +62,4 @@ For endpoint parameters, response shapes, and examples, read:
 - Use `type` on `/api/search` only when the user asks for one content type.
 - Use `/api/tasks/:slug` before `/api/articles/:slug` when the user wants the full case context.
 - Use `/api/articles/:slug` when the user specifically needs Markdown content for rewriting, syncing, or summarizing.
+- Use `/api/assets` for public asset discovery across the site.
