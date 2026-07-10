@@ -1,6 +1,6 @@
 ---
 name: publish-agent-case-share
-description: Publish or edit tasks/cases, articles/tutorials, Markdown images, and reusable assets on Agent Case Share using HTTP APIs. Use when the user asks Codex, Claude Code, Gemini CLI, or another AI coding agent to upload, create, publish, draft, edit, update, revise, or sync Agent Case Share tasks, cases, tutorials, articles, Markdown images, standalone user assets, case-attached reusable assets, or asset metadata.
+description: Publish, edit, or delete tasks/cases, articles/tutorials, Markdown images, and reusable assets on Agent Case Share using HTTP APIs. Use when the user asks Codex, Claude Code, Gemini CLI, or another AI coding agent to upload, create, publish, draft, edit, update, revise, delete, or sync Agent Case Share tasks, cases, tutorials, articles, Markdown images, standalone user assets, case-attached reusable assets, or asset metadata.
 ---
 
 # Publish to Agent Case Share
@@ -24,13 +24,21 @@ Confirm:
 
 - Base URL, default `https://agentcaseshare.cn/`
 - Personal API key generated from `/profile`
-- Whether the user wants to create or edit a task/case, article/tutorial, Markdown image, case-attached reusable asset, standalone user asset, asset metadata, or a combination
+- Whether the user wants to create, edit, or delete a task/case, article/tutorial, Markdown image, case-attached reusable asset, standalone user asset, asset metadata, or a combination
 
 ## Reference
 
 For endpoint fields, payload examples, responses, and error handling, read:
 
 - `references/api.md`
+
+## Slug Handling
+
+- Let the API generate slugs for new content. New case slugs use `case-xxxxxxxx`; new article slugs use `article-xxxxxxxx`.
+- Omit `slug` when creating a new article. Supplying `slug` targets that normalized ASCII slug and can update an existing manageable article.
+- Treat returned `slug` and `taskSlug` values as opaque identifiers; do not derive them from titles.
+- Use returned `url` and `taskUrl` values directly because they are already percent-encoded.
+- When constructing `PATCH` or `DELETE` paths from a raw slug, encode the path segment exactly once with `encodeURIComponent`. Decode an already encoded URL segment once before rebuilding a path.
 
 ## Workflow
 
@@ -42,8 +50,10 @@ For endpoint fields, payload examples, responses, and error handling, read:
    - Asset metadata editing -> `PATCH /api/assets/:id`
    - Case/task publishing -> `POST /api/tasks`
    - Case/task editing -> `PATCH /api/tasks/:slug`
+   - Case/task deletion -> `DELETE /api/tasks/:slug` when a signed-in browser session is available
    - Article/tutorial publishing -> `POST /api/articles`
    - Article/tutorial editing -> `PATCH /api/articles/:slug`
+   - Article/tutorial deletion -> `DELETE /api/articles/:slug`
 2. If Markdown contains local image paths, upload each image first and replace local paths with returned URLs.
 3. Normalize content into the required payload.
 4. Resolve the base URL from `AGENT_CASE_SHARE_BASE_URL`, the user, or default to `https://agentcaseshare.cn/`.
@@ -52,8 +62,9 @@ For endpoint fields, payload examples, responses, and error handling, read:
 7. For assets that should appear on a case, upload files to `POST /api/assets` first and place returned draft `asset` objects into `reusableAssets` when creating or updating the task.
 8. For assets that should exist in the user's asset library independent of a case, upload files to `POST /api/assets/user` and report the returned `asset.id`.
 9. For editing existing asset metadata, send only fields that should change to `PATCH /api/assets/:id`; do not try to replace the uploaded file through this endpoint.
-10. After success, report returned `slug`, `url`, `taskSlug`, `taskUrl`, `asset.id`, or `asset.url`.
-11. On API failure, show the returned `error` message and ask whether to revise and retry.
+10. For deletion, confirm the target slug/id and use the relevant `DELETE` endpoint only when the user explicitly asks to delete.
+11. After success, report returned `slug`, `url`, `taskSlug`, `taskUrl`, `asset.id`, or `asset.url`.
+12. On API failure, show the returned `error` message and ask whether to revise and retry.
 
 ## Content Mapping
 
@@ -97,6 +108,7 @@ For editing an existing task/case:
 - Send only fields that should change.
 - Include `status` when changing visibility: `{ "status": "HIDDEN" }` or `{ "status": "PUBLISHED" }`.
 - Omit `repositories` and `reusableAssets` unless replacing the full target list.
+- Use `DELETE /api/tasks/:slug` only when the user explicitly asks to delete a case. This endpoint requires a signed-in browser session and returns `{ "url": "/profile" }` on success.
 
 For an article/tutorial:
 
@@ -105,6 +117,7 @@ For an article/tutorial:
 - `status`: default `DRAFT`; use `PUBLISHED` only when requested
 - `taskSlug` or `taskId`: include when attaching to an existing task
 - `taskTitle` and `taskSummary`: include when no existing task is provided and the API should create a lightweight task container
+- Omit `slug` for a new article so the API generates an `article-xxxxxxxx` identifier; send a known existing slug only when intentionally updating through `POST /api/articles`
 
 For editing an existing article/tutorial:
 
@@ -112,6 +125,7 @@ For editing an existing article/tutorial:
 - Use `PATCH /api/articles/:slug`.
 - Send only fields that should change.
 - Use `taskSlug` only when moving the article to another existing case.
+- Use `DELETE /api/articles/:slug` only when the user explicitly asks to delete an article. It returns the parent `taskSlug` and `taskUrl` on success.
 
 ## Public Publishing Rule
 

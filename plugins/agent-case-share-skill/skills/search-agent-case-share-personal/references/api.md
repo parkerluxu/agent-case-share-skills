@@ -10,6 +10,10 @@ Authorization: Bearer acsp_live_<secret>
 
 Use a bearer token for external scripts and AI agents. Never store or print real keys.
 
+## Slug and URL Encoding
+
+New cases use opaque `case-xxxxxxxx` slugs, and their articles use `article-xxxxxxxx`; each suffix has 8 lowercase letters or digits. Use returned `url` values directly because they are already percent-encoded. When building `/api/me/cases/:slug` from a raw `slug` field, encode the path segment exactly once with `encodeURIComponent`. Decode an already encoded task URL segment once before rebuilding a different path. Do not infer a slug from its title.
+
 ## Personal Search
 
 ```http
@@ -34,8 +38,8 @@ Returns:
       "type": "case",
       "id": "case-id",
       "title": "Support review agent",
-      "slug": "support-review-agent",
-      "url": "/tasks/support-review-agent",
+      "slug": "case-k3j9f2a8",
+      "url": "/tasks/case-k3j9f2a8",
       "excerpt": "Short summary...",
       "status": "HIDDEN",
       "tags": [{ "id": "tag-id", "name": "Automation", "slug": "automation" }],
@@ -50,6 +54,8 @@ Returns:
       "excerpt": "Reusable support review workflow.",
       "status": "PUBLISHED",
       "assetType": "SKILL",
+      "sourceType": "USER_UPLOAD",
+      "category": null,
       "fileName": "support-review-skill.zip",
       "task": null,
       "updatedAt": "2026-07-07T00:00:00.000Z"
@@ -84,8 +90,8 @@ Returns card fields:
     {
       "id": "case-id",
       "title": "Support review agent",
-      "slug": "support-review-agent",
-      "url": "/tasks/support-review-agent",
+      "slug": "case-k3j9f2a8",
+      "url": "/tasks/case-k3j9f2a8",
       "summary": "Short summary...",
       "status": "HIDDEN",
       "category": { "id": "category-id", "name": "Customer service", "slug": "customer-service-operations" },
@@ -114,21 +120,20 @@ Returns one authenticated-user-owned case. This endpoint can return hidden or dr
   "case": {
     "id": "case-id",
     "title": "Support review agent",
-    "slug": "support-review-agent",
-    "url": "/tasks/support-review-agent",
+    "slug": "case-k3j9f2a8",
+    "url": "/tasks/case-k3j9f2a8",
     "summary": "Short summary...",
     "status": "HIDDEN",
     "problem": "Business problem...",
     "solution": "Agent solution...",
     "workflow": "Step 1\nStep 2",
     "impact": "Result...",
-    "reviewNote": "Reviewer note if any.",
     "articles": [
       {
         "id": "article-id",
         "title": "Deployment guide",
-        "slug": "deployment-guide",
-        "url": "/articles/deployment-guide",
+        "slug": "article-m4n8q2x7",
+        "url": "/articles/article-m4n8q2x7",
         "status": "DRAFT",
         "order": 1
       }
@@ -180,6 +185,7 @@ Returns:
       "id": "asset-id",
       "title": "Support review skill",
       "type": "SKILL",
+      "sourceType": "USER_UPLOAD",
       "url": "/assets/asset-id",
       "downloadUrl": "/api/assets/asset-id/download",
       "summary": "Reusable support review workflow.",
@@ -190,6 +196,9 @@ Returns:
       "status": "PUBLISHED",
       "downloadCount": 3,
       "likeCount": 1,
+      "license": null,
+      "category": null,
+      "author": { "id": "user-id", "name": "Author", "email": "author@example.com" },
       "task": null,
       "updatedAt": "2026-07-07T00:00:00.000Z"
     }
@@ -215,6 +224,7 @@ Returns one authenticated-user-owned reusable asset.
     "id": "asset-id",
     "title": "Support review skill",
     "type": "SKILL",
+    "sourceType": "USER_UPLOAD",
     "url": "/assets/asset-id",
     "downloadUrl": "/api/assets/asset-id/download",
     "summary": "Reusable support review workflow.",
@@ -225,6 +235,9 @@ Returns one authenticated-user-owned reusable asset.
     "status": "PUBLISHED",
     "downloadCount": 3,
     "likeCount": 1,
+    "license": null,
+    "category": null,
+    "author": { "id": "user-id", "name": "Author", "email": "author@example.com" },
     "task": null,
     "createdAt": "2026-07-07T00:00:00.000Z",
     "updatedAt": "2026-07-07T00:00:00.000Z"
@@ -234,7 +247,7 @@ Returns one authenticated-user-owned reusable asset.
 
 ## Error Handling
 
-- `400`: invalid query parameter such as `type`, `source`, or `status`
+- `400`: invalid query parameter such as `type` or `status`
 - `401`: missing, invalid, or revoked personal API key, or no signed-in session
 - `404`: the case or asset does not exist in the authenticated user's library
 

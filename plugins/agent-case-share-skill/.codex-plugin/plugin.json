@@ -1,7 +1,7 @@
 {
   "name": "agent-case-share-skill",
-  "version": "0.3.2",
-  "description": "Search, read, publish, and edit Agent Case Share content and personal assets.",
+  "version": "0.3.3",
+  "description": "Search, read, publish, edit, and delete Agent Case Share content and personal assets.",
   "author": {
     "name": "parkerluxu",
     "url": "https://github.com/parkerluxu"
@@ -14,7 +14,7 @@
   "interface": {
     "displayName": "Agent Case Share",
     "shortDescription": "Search and publish Agent Case Share content.",
-    "longDescription": "Search public and personal Agent Case Share content, including case, project, and paper detail APIs, and publish or edit tasks, articles, Markdown images, reusable assets, and asset metadata from AI coding agents.",
+    "longDescription": "Search public and personal Agent Case Share content, including case, project, paper, and asset APIs, and publish, edit, or delete tasks, articles, Markdown images, reusable assets, and asset metadata from AI coding agents.",
     "developerName": "parkerluxu",
     "category": "Productivity",
     "capabilities": ["Write"],

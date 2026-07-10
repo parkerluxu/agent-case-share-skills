@@ -34,6 +34,13 @@ For endpoint parameters, response shapes, and examples, read:
 
 - `references/api.md`
 
+## Slug Handling
+
+- Treat returned slugs as opaque identifiers. Newly generated case slugs use `case-xxxxxxxx`; related article slugs use `article-xxxxxxxx`.
+- Use returned `url` values directly because they are already percent-encoded.
+- When constructing `/api/me/cases/:slug` from a raw `slug` field, encode the path segment exactly once with `encodeURIComponent`.
+- When extracting a slug from an already encoded task URL, decode the path segment once before encoding it for the API path. Do not double-encode it or derive it from the title.
+
 ## Workflow
 
 1. Resolve the base URL from `AGENT_CASE_SHARE_BASE_URL`, the user, or default to `https://agentcaseshare.cn/`.
@@ -44,7 +51,7 @@ For endpoint parameters, response shapes, and examples, read:
    - Read one personal case -> `GET /api/me/cases/:slug`
    - List/filter personal assets -> `GET /api/me/assets`
    - Read one personal asset -> `GET /api/me/assets/:id`
-4. If the user provides a URL, infer:
+4. If the user provides a URL, infer while preserving a single percent-encoding of the path segment:
    - `/tasks/:slug` -> `GET /api/me/cases/:slug`
    - `/assets/:id` -> `GET /api/me/assets/:id`
 5. Fetch JSON and inspect `items`, `case`, or `asset`.
@@ -58,6 +65,6 @@ For endpoint parameters, response shapes, and examples, read:
 
 - Use `/api/me/search` for fast recall across the user's cases and assets.
 - Use `/api/me/cases` when the user needs status/category/tag filters or pagination for personal cases.
-- Use `/api/me/assets` when the user needs asset `type`, `source`, `status`, or pagination filters.
+- Use `/api/me/assets` when the user needs asset `type`, `status`, or pagination filters.
 - Omit `status` on `/api/me/cases` and `/api/me/assets` when the user wants all personal statuses; send `status=PUBLISHED`, `HIDDEN`, or `DRAFT` only when requested.
-- Use `/api/me/cases/:slug` before article endpoints when the user wants case context, repositories, reusable assets, or review notes for their own case.
+- Use `/api/me/cases/:slug` before article endpoints when the user wants case context, repositories, or reusable assets for their own case.

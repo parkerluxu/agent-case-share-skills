@@ -1,6 +1,6 @@
 ---
 name: search-agent-case-share
-description: Search, discover, and read public or authorized Agent Case Share knowledge-base content through JSON APIs. Use when the user asks an AI agent to find cases/tasks, articles/tutorials, AI news, open-source projects, papers, categories, tags, reusable assets, repositories, or Markdown content from an Agent Case Share site.
+description: Search, discover, and read public or authorized Agent Case Share knowledge-base content through JSON APIs. Use when the user asks an AI agent to find cases/tasks, articles/tutorials, AI news, public projects, papers, categories, tags, reusable assets, repositories, or Markdown content from an Agent Case Share site.
 ---
 
 # Search Agent Case Share
@@ -34,6 +34,14 @@ For endpoint parameters, response shapes, and examples, read:
 
 - `references/api.md`
 
+## Slug Handling
+
+- Treat every API-returned slug as an opaque identifier. Newly generated slugs use `case-xxxxxxxx`, `article-xxxxxxxx`, `project-xxxxxxxx`, or `paper-xxxxxxxx` according to content type.
+- Use returned `url` and `taskUrl` values directly; they are already percent-encoded. Do not encode them again.
+- When constructing an API path from a raw `slug` field, encode that path segment exactly once with `encodeURIComponent`.
+- When extracting a slug from an already encoded site URL before rebuilding a different path, decode the path segment once, then encode it once for the new path.
+- Do not derive a slug from a title or name and do not assume that a case slug starts with `task-`; cases use the `case-` prefix.
+
 ## Workflow
 
 1. Resolve the base URL from `AGENT_CASE_SHARE_BASE_URL`, the user, or default to `https://agentcaseshare.cn/`.
@@ -47,7 +55,7 @@ For endpoint parameters, response shapes, and examples, read:
    - Project detail -> `GET /api/projects/:slug`
    - Paper detail -> `GET /api/papers/:slug`
    - Public asset list/filtering -> `GET /api/assets`
-3. If the user provides a site URL, infer the slug and endpoint:
+3. If the user provides a site URL, infer the slug and endpoint, preserving the path segment's single percent-encoding:
    - `/tasks/:slug` -> `GET /api/tasks/:slug`
    - `/articles/:slug` -> `GET /api/articles/:slug`
    - `/projects/:slug` -> `GET /api/projects/:slug`
@@ -63,9 +71,9 @@ For endpoint parameters, response shapes, and examples, read:
 
 - Use `category` with category slugs from `/api/categories`.
 - Use `tag` with tag names or slugs from `/api/tags`.
-- Use `type` on `/api/search` only when the user asks for one content type.
+- Use `type` on `/api/search` only when the user asks for one content type: `task`, `article`, `news`, `project`, or `paper`.
 - Use `/api/tasks/:slug` before `/api/articles/:slug` when the user wants the full case context.
 - Use `/api/articles/:slug` when the user specifically needs Markdown content for rewriting, syncing, or summarizing.
-- Use `/api/projects/:slug` when the user needs the full open-source project description, repo/site/tutorial URLs, quality score, or tags.
-- Use `/api/papers/:slug` when the user needs full paper metadata, links, DOI, keywords, notes, quality score, or tags.
-- Use `/api/assets` for public asset discovery across the site.
+- Use `/api/projects/:slug` when the user needs the full public project description, repo/site/tutorial URLs, license, or tags.
+- Use `/api/papers/:slug` when the user needs full paper metadata, links, DOI, keywords, notes, or tags.
+- Use `/api/assets` for public asset discovery across the site; use `category` when the user asks for category-specific assets.

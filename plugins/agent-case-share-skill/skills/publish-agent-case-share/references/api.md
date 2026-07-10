@@ -13,6 +13,12 @@ Content-Type: application/json
 
 Do not ask for the user's password. Do not store the API key in logs, committed files, screenshots, shared prompts, or generated artifacts.
 
+## Slug and URL Encoding
+
+Let the API generate slugs for new content. New cases use `case-xxxxxxxx`, and new articles use `article-xxxxxxxx`; each suffix has 8 lowercase letters or digits. Omit `slug` when creating a new article. If a custom article slug is supplied, the API normalizes it to lowercase ASCII letters, digits, and hyphens, and an existing manageable article with that slug is updated.
+
+Treat returned `slug` and `taskSlug` fields as opaque identifiers. Use returned `url` and `taskUrl` fields directly because they are already percent-encoded. When building `PATCH` or `DELETE` endpoints from a raw slug, encode the path segment exactly once with `encodeURIComponent`; decode an already encoded URL segment once before rebuilding a path.
+
 ## Upload a Content Image
 
 Endpoint:
@@ -35,14 +41,6 @@ Supported extensions:
 - `.jpeg`
 - `.webp`
 - `.gif`
-
-curl example:
-
-```bash
-curl -X POST "$AGENT_CASE_SHARE_BASE_URL/api/content-images" \
-  -H "Authorization: Bearer $AGENT_CASE_SHARE_API_KEY" \
-  -F "file=@./images/flow-screenshot.png"
-```
 
 Successful response:
 
@@ -73,7 +71,7 @@ POST /api/assets
 Content-Type: multipart/form-data
 ```
 
-Use this before `POST /api/tasks` when a task should include reusable assets such as skills, prompts, workflows, templates, or MCP configs. Without `publishAsset=true`, this endpoint only uploads the file and returns metadata that can be placed in a task `reusableAssets` array.
+Use this before `POST /api/tasks` when a case should include reusable assets such as skills, prompts, workflows, templates, or MCP configs. Without `publishAsset=true`, this endpoint uploads the file and returns metadata that can be placed in a task `reusableAssets` array.
 
 Form fields:
 
@@ -94,18 +92,6 @@ Supported extensions:
 - `.yaml`
 - `.yml`
 
-curl example:
-
-```bash
-curl -X POST "$AGENT_CASE_SHARE_BASE_URL/api/assets" \
-  -H "Authorization: Bearer $AGENT_CASE_SHARE_API_KEY" \
-  -F "file=@./support-review-skill.zip" \
-  -F "title=Support Review Skill" \
-  -F "type=SKILL" \
-  -F "summary=Reusable support review skill" \
-  -F "version=v1.0.0"
-```
-
 Successful response:
 
 ```json
@@ -124,7 +110,7 @@ Successful response:
 }
 ```
 
-Use the returned `asset` object inside `reusableAssets` when creating or editing a task. Do not use `POST /api/assets/user` for this path because task creation stores attached assets as case-scoped `CASE_EXTRACTED` records from draft metadata.
+Use the returned `asset` object inside `reusableAssets` when creating or editing a task. Do not use `POST /api/assets/user` for this path because task creation stores attached assets as case-scoped records from draft metadata.
 
 ## Upload a Standalone User Asset
 
@@ -135,7 +121,7 @@ POST /api/assets/user
 Content-Type: multipart/form-data
 ```
 
-Use this when the user wants to add an asset to their personal asset library independent of a case. This is the preferred endpoint for normal users and AI agents. The asset is stored as a user-uploaded asset.
+Use this when the user wants to add an asset to their personal asset library independent of a case. This is the preferred endpoint for normal users and AI agents.
 
 Form fields:
 
@@ -146,28 +132,6 @@ Form fields:
 - `version`: optional version label
 - `visibility`: optional enum, `PUBLISHED` or `HIDDEN`; API default is `PUBLISHED`, but AI agents should send `HIDDEN` unless the user explicitly requests public publishing
 
-Supported extensions:
-
-- `.zip`
-- `.md`
-- `.txt`
-- `.json`
-- `.yaml`
-- `.yml`
-
-curl example:
-
-```bash
-curl -X POST "$AGENT_CASE_SHARE_BASE_URL/api/assets/user" \
-  -H "Authorization: Bearer $AGENT_CASE_SHARE_API_KEY" \
-  -F "file=@./support-review-skill.zip" \
-  -F "title=Support Review Skill" \
-  -F "type=SKILL" \
-  -F "summary=Reusable support review skill" \
-  -F "version=v1.0.0" \
-  -F "visibility=HIDDEN"
-```
-
 Successful response:
 
 ```json
@@ -176,6 +140,7 @@ Successful response:
     "id": "asset-id",
     "title": "Support Review Skill",
     "type": "SKILL",
+    "sourceType": "USER_UPLOAD",
     "summary": "Reusable support review skill",
     "version": "v1.0.0",
     "fileName": "support-review-skill.zip",
@@ -206,20 +171,6 @@ Additional form fields:
 - `publishAsset`: set to `true`
 - `visibility`: optional enum, `PUBLISHED` or `HIDDEN`; send `HIDDEN` unless the user explicitly requests public publishing
 
-curl example:
-
-```bash
-curl -X POST "$AGENT_CASE_SHARE_BASE_URL/api/assets" \
-  -H "Authorization: Bearer $AGENT_CASE_SHARE_API_KEY" \
-  -F "file=@./support-review-skill.zip" \
-  -F "title=Support Review Skill" \
-  -F "type=SKILL" \
-  -F "summary=Reusable support review skill" \
-  -F "version=v1.0.0" \
-  -F "publishAsset=true" \
-  -F "visibility=HIDDEN"
-```
-
 Successful response shape matches `POST /api/assets/user`.
 
 ## Edit Asset Metadata
@@ -247,19 +198,6 @@ Optional fields:
 - `visibility`: one of `DRAFT`, `PUBLISHED`, `HIDDEN`
 - `status`: alias for `visibility`; one of `DRAFT`, `PUBLISHED`, `HIDDEN`
 
-curl example:
-
-```bash
-curl -X PATCH "$AGENT_CASE_SHARE_BASE_URL/api/assets/asset-id" \
-  -H "Authorization: Bearer $AGENT_CASE_SHARE_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Support Review Skill v2",
-    "summary": "Updated reuse notes.",
-    "visibility": "HIDDEN"
-  }'
-```
-
 Successful response:
 
 ```json
@@ -268,12 +206,14 @@ Successful response:
     "id": "asset-id",
     "title": "Support Review Skill v2",
     "type": "SKILL",
+    "sourceType": "USER_UPLOAD",
     "summary": "Updated reuse notes.",
     "version": "v1.0.0",
     "fileName": "support-review-skill.zip",
     "mimeType": "application/zip",
     "fileSize": 12345,
     "downloadCount": 3,
+    "likeCount": 1,
     "status": "HIDDEN",
     "updatedAt": "2026-07-07T00:00:00.000Z",
     "taskId": null,
@@ -307,7 +247,7 @@ Optional fields:
 - `industry`
 - `difficulty`: `BEGINNER`, `INTERMEDIATE`, or `ADVANCED`
 - `visibility`: `PUBLISHED` or `HIDDEN`
-- `tags`: comma-separated or newline-separated tag names
+- `tags`: comma-separated, Chinese-comma-separated, or newline-separated tag names; maximum 8
 - `agentStack`
 - `problem`
 - `solution`
@@ -317,7 +257,7 @@ Optional fields:
 - `estimatedTimeSaved`
 - `costLevel`: `LOW`, `MEDIUM`, `HIGH`, or `UNKNOWN`
 - `coverImage`: case cover URL, recommended ratio 7:4
-- `tools`: comma-separated or newline-separated tool names
+- `tools`: comma-separated, Chinese-comma-separated, or newline-separated tool names; maximum 12
 - `articleTitle`
 - `articleExcerpt`
 - `articleContent`
@@ -332,67 +272,21 @@ Category guidance:
 
 - Prefer `categorySlug` over free-form `industry` when publishing or creating an article container.
 - Discover the current visible list with `GET /api/categories` before publishing when possible.
-- If live discovery is unavailable, use the default industry table below.
+- If live discovery is unavailable, use these stable default slugs:
+  `electronics-hardware`, `web-development`, `supply-chain-manufacturing`, `finance-accounting`, `healthcare`, `education-training`, `retail-ecommerce`, `content-creation`, `creative-arts-design`, `government-public-services`, `enterprise-service-office`, `customer-service-operations`, `marketing`, `rd-it`, `data-analysis`, `legal-compliance`, `human-resources`, `research`, `personal-productivity-life`, `general-automation`, `other`.
 - `industry` is display text; when provided, keep it aligned with the chosen category name.
-
-Default industry categories:
-
-| Name | Slug |
-| --- | --- |
-| 电子信息与硬件 | `electronics-hardware` |
-| 软件与互联网 | `web-development` |
-| 智能制造 | `supply-chain-manufacturing` |
-| 金融与财税 | `finance-accounting` |
-| 医疗与健康 | `healthcare` |
-| 教育与培训 | `education-training` |
-| 零售与电商 | `retail-ecommerce` |
-| 内容与传媒 | `content-creation` |
-| 创意艺术与设计 | `creative-arts-design` |
-| 政务与公共服务 | `government-public-services` |
-| 企业服务与办公 | `enterprise-service-office` |
-| 销售与客户服务 | `customer-service-operations` |
-| 市场与增长 | `marketing` |
-| 研发与 IT | `rd-it` |
-| 数据与经营分析 | `data-analysis` |
-| 法务与合规 | `legal-compliance` |
-| 人力资源 | `human-resources` |
-| 科研与学术 | `research` |
-| 个人效率与生活 | `personal-productivity-life` |
-| 通用自动化 | `general-automation` |
-| 其他 | `other` |
-
-Known category descriptions:
-
-- `creative-arts-design`: 面向艺术、设计、创意内容和 AIGC 创作工作流的 AI Agent 案例。
 
 Unsupported through this endpoint:
 
-- `featured`
-- `reviewNote`
-- `qualityScore`
-- `viewCount`
 - Multiple repositories in one request
 - Multiple articles in one request
 - Raw file binary uploads
-
-Example payload:
-
-```json
-{
-  "title": "AI agent support review report",
-  "summary": "Connects conversations, tickets, and a knowledge base so an agent can generate review summaries.",
-  "categorySlug": "customer-service-operations",
-  "visibility": "HIDDEN",
-  "tags": "support, automation",
-  "agentStack": "Next.js, OpenAI, PostgreSQL"
-}
-```
 
 Successful response:
 
 ```json
 {
-  "slug": "generated-task-slug"
+  "slug": "case-k3j9f2a8"
 }
 ```
 
@@ -413,7 +307,7 @@ Optional fields:
 - `categoryId`: use an empty string to clear the category
 - `difficulty`: `BEGINNER`, `INTERMEDIATE`, or `ADVANCED`
 - `status`: `DRAFT`, `PUBLISHED`, or `HIDDEN`
-- `tags`: comma-separated or newline-separated tag names, maximum 8
+- `tags`: comma-separated, Chinese-comma-separated, or newline-separated tag names; maximum 8
 - `agentStack`
 - `problem`
 - `solution`
@@ -423,17 +317,9 @@ Optional fields:
 - `estimatedTimeSaved`
 - `costLevel`: `LOW`, `MEDIUM`, `HIGH`, or `UNKNOWN`
 - `coverImage`: case cover URL, recommended ratio 7:4
-- `tools`: comma-separated or newline-separated tool names, maximum 12
-- `repositories`: full target repository list; omit to keep unchanged
-- `reusableAssets`: full target reusable asset list; omit to keep unchanged
-
-Status-only edit:
-
-```json
-{
-  "status": "HIDDEN"
-}
-```
+- `tools`: comma-separated, Chinese-comma-separated, or newline-separated tool names; maximum 12
+- `repositories`: full target repository list; omit to keep unchanged, send `[]` to clear
+- `reusableAssets`: full target reusable asset list; omit to keep unchanged, send `[]` to clear
 
 `PATCH /api/tasks/:slug` edits case metadata, retrospective fields, repositories, and reusable assets. It does not edit article Markdown text.
 
@@ -442,9 +328,27 @@ Successful response:
 ```json
 {
   "id": "task-id",
-  "slug": "agent-customer-support-quality-review",
-  "url": "/tasks/agent-customer-support-quality-review",
+  "slug": "case-k3j9f2a8",
+  "url": "/tasks/case-k3j9f2a8",
   "status": "HIDDEN"
+}
+```
+
+## Delete a Task
+
+Endpoint:
+
+```http
+DELETE /api/tasks/:slug
+```
+
+Use this only when the user explicitly asks to delete a case. This endpoint currently requires a signed-in browser session; a bearer personal API key is not enough for task deletion.
+
+Successful response:
+
+```json
+{
+  "url": "/profile"
 }
 ```
 
@@ -481,32 +385,21 @@ Optional fields:
 - `impact`
 - `humanInLoop`
 - `excerpt`
-- `slug`
+- `slug`: omit for new articles; when supplied, it is ASCII-normalized and updates the existing article with that slug when the user can manage it
 - `status`: `DRAFT`, `PUBLISHED`, or `HIDDEN`
 - `order`
 
 If `taskId` and `taskSlug` are omitted, the API creates a lightweight task container for the article.
-
-Example payload:
-
-```json
-{
-  "taskSlug": "agent-customer-support-quality-review",
-  "title": "Support review agent deployment guide",
-  "content": "## Setup\n\n## Deployment\n\n## Troubleshooting",
-  "status": "DRAFT"
-}
-```
 
 Successful response:
 
 ```json
 {
   "id": "article-id",
-  "slug": "article-slug",
-  "url": "/articles/article-slug",
-  "taskSlug": "task-slug",
-  "taskUrl": "/tasks/task-slug"
+  "slug": "article-m4n8q2x7",
+  "url": "/articles/article-m4n8q2x7",
+  "taskSlug": "case-k3j9f2a8",
+  "taskUrl": "/tasks/case-k3j9f2a8"
 }
 ```
 
@@ -531,31 +424,42 @@ Optional fields:
 
 `PATCH /api/articles/:slug` edits article fields only. It does not edit case title, summary, cover, tags, or retrospective fields.
 
-Example payload:
-
-```json
-{
-  "status": "PUBLISHED"
-}
-```
-
 Successful response:
 
 ```json
 {
   "id": "article-id",
-  "slug": "support-review-agent-deployment-guide",
-  "url": "/articles/support-review-agent-deployment-guide",
-  "taskSlug": "agent-customer-support-quality-review",
-  "taskUrl": "/tasks/agent-customer-support-quality-review"
+  "slug": "article-m4n8q2x7",
+  "url": "/articles/article-m4n8q2x7",
+  "taskSlug": "case-k3j9f2a8",
+  "taskUrl": "/tasks/case-k3j9f2a8"
+}
+```
+
+## Delete an Article
+
+Endpoint:
+
+```http
+DELETE /api/articles/:slug
+```
+
+Use this only when the user explicitly asks to delete an article. Article authors and linked case authors can delete through this endpoint.
+
+Successful response:
+
+```json
+{
+  "taskSlug": "case-k3j9f2a8",
+  "taskUrl": "/tasks/case-k3j9f2a8"
 }
 ```
 
 ## Error Handling
 
-- `400`: required fields are missing, enum values are invalid, or JSON is malformed
-- `401`: API key is missing, invalid, or revoked
-- `403`: authenticated user cannot edit the requested task, article, or asset
+- `400`: required fields are missing, enum values are invalid, JSON is malformed, or file upload form data is invalid
+- `401`: API key is missing, invalid, revoked, or the endpoint requires a signed-in session
+- `403`: authenticated user cannot edit or delete the requested task, article, or asset
 - `404`: task, article, asset, or slug does not exist, or is not editable by the current user
 
 On failure:

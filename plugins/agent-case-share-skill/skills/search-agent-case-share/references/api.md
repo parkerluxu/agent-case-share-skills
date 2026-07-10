@@ -10,6 +10,17 @@ Authorization: Bearer acsp_live_<secret>
 
 Use a bearer token only when needed. Never store or print real keys.
 
+## Slug and URL Encoding
+
+New content slugs are opaque, pure-ASCII identifiers with an 8-character lowercase letter/digit suffix:
+
+- Case: `case-xxxxxxxx`
+- Article: `article-xxxxxxxx`
+- Project: `project-xxxxxxxx`
+- Paper: `paper-xxxxxxxx`
+
+Use API-returned `url` and `taskUrl` fields directly; they are already percent-encoded. When building an endpoint from a raw `slug` field, encode the path segment exactly once with `encodeURIComponent`. If the source is an already encoded site URL, decode its path segment once before encoding it for a different API path. Do not infer slugs from titles or names.
+
 ## Categories
 
 ```http
@@ -114,8 +125,8 @@ Returns lightweight results:
     {
       "type": "task",
       "title": "Support review agent",
-      "slug": "support-review-agent",
-      "url": "/tasks/support-review-agent",
+      "slug": "case-k3j9f2a8",
+      "url": "/tasks/case-k3j9f2a8",
       "excerpt": "Short summary...",
       "tags": [{ "name": "Automation", "slug": "automation" }],
       "updatedAt": "2026-07-05T00:00:00.000Z"
@@ -148,8 +159,8 @@ Returns card fields only, not long body text:
     {
       "id": "task-id",
       "title": "Support review agent",
-      "slug": "support-review-agent",
-      "url": "/tasks/support-review-agent",
+      "slug": "case-k3j9f2a8",
+      "url": "/tasks/case-k3j9f2a8",
       "summary": "Short summary...",
       "industry": "销售与客户服务",
       "difficulty": "BEGINNER",
@@ -180,8 +191,8 @@ Returns case details, related articles, repositories, and reusable assets:
 {
   "task": {
     "title": "Support review agent",
-    "slug": "support-review-agent",
-    "url": "/tasks/support-review-agent",
+    "slug": "case-k3j9f2a8",
+    "url": "/tasks/case-k3j9f2a8",
     "summary": "Short summary...",
     "problem": "Business problem...",
     "solution": "Agent solution...",
@@ -191,8 +202,8 @@ Returns case details, related articles, repositories, and reusable assets:
     "articles": [
       {
         "title": "Deployment guide",
-        "slug": "deployment-guide",
-        "url": "/articles/deployment-guide",
+        "slug": "article-m4n8q2x7",
+        "url": "/articles/article-m4n8q2x7",
         "excerpt": "Article excerpt..."
       }
     ],
@@ -226,16 +237,16 @@ Returns article metadata and Markdown body:
 {
   "article": {
     "title": "Deployment guide",
-    "slug": "deployment-guide",
-    "url": "/articles/deployment-guide",
+    "slug": "article-m4n8q2x7",
+    "url": "/articles/article-m4n8q2x7",
     "excerpt": "Article excerpt...",
     "content": "## Markdown body\n\n...",
     "markdown": "## Markdown body\n\n...",
     "status": "PUBLISHED",
     "task": {
       "title": "Support review agent",
-      "slug": "support-review-agent",
-      "url": "/tasks/support-review-agent"
+      "slug": "case-k3j9f2a8",
+      "url": "/tasks/case-k3j9f2a8"
     }
   }
 }
@@ -247,15 +258,15 @@ Returns article metadata and Markdown body:
 GET /api/projects/:slug
 ```
 
-Returns one open-source project detail record. Published projects are public. Draft or hidden projects require an admin signed-in session or an admin personal API key.
+Returns one published public project detail record.
 
 ```json
 {
   "project": {
     "id": "project-id",
-    "name": "Open-source agent framework",
-    "slug": "open-source-agent-framework",
-    "url": "/projects/open-source-agent-framework",
+    "name": "Agent framework",
+    "slug": "project-r7c4v9b2",
+    "url": "/projects/project-r7c4v9b2",
     "summary": "Short project summary...",
     "description": "Longer project description...",
     "repoUrl": "https://github.com/example/agent-framework",
@@ -265,8 +276,6 @@ Returns one open-source project detail record. Published projects are public. Dr
     "maturity": "Production-ready",
     "license": "MIT",
     "status": "PUBLISHED",
-    "featured": false,
-    "qualityScore": 4,
     "likeCount": 12,
     "category": { "id": "category-id", "name": "AI Agents", "slug": "ai-agents" },
     "tags": [{ "id": "tag-id", "name": "Agent", "slug": "agent" }],
@@ -282,15 +291,15 @@ Returns one open-source project detail record. Published projects are public. Dr
 GET /api/papers/:slug
 ```
 
-Returns one paper detail record. Published papers are public. Draft or hidden papers require an admin signed-in session or an admin personal API key.
+Returns one published public paper detail record.
 
 ```json
 {
   "paper": {
     "id": "paper-id",
     "title": "Agent Research Paper",
-    "slug": "agent-research-paper",
-    "url": "/papers/agent-research-paper",
+    "slug": "paper-t6h3w8p5",
+    "url": "/papers/paper-t6h3w8p5",
     "excerpt": "Short paper summary...",
     "authors": "A. Researcher, B. Builder",
     "year": 2026,
@@ -300,8 +309,6 @@ Returns one paper detail record. Published papers are public. Draft or hidden pa
     "keywords": "agents, evaluation",
     "note": "Curator notes...",
     "status": "PUBLISHED",
-    "featured": false,
-    "qualityScore": 4,
     "likeCount": 8,
     "category": { "id": "category-id", "name": "Research", "slug": "research" },
     "tags": [{ "id": "tag-id", "name": "Evaluation", "slug": "evaluation" }],
@@ -314,7 +321,7 @@ Returns one paper detail record. Published papers are public. Draft or hidden pa
 ## Public Asset List
 
 ```http
-GET /api/assets?q=skill&type=SKILL&status=PUBLISHED&limit=10&page=1
+GET /api/assets?q=skill&type=SKILL&category=customer-service-operations&status=PUBLISHED&limit=10&page=1
 ```
 
 Use this to discover reusable assets across the public asset library. Published assets are public. `DRAFT` and `HIDDEN` require authorization and only return assets visible to the authenticated user.
@@ -323,6 +330,7 @@ Parameters:
 
 - `q`: optional keyword; searches title, summary, file name, linked task title, and linked task summary
 - `type`: optional asset type, one of `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, `OTHER`
+- `category`: optional category slug
 - `status`: optional, default `PUBLISHED`; `DRAFT` and `HIDDEN` require authorization
 - `limit`: optional, default 10, maximum 50
 - `page`: optional, default 1
@@ -336,6 +344,7 @@ Returns asset metadata, linked task context when present, and a download endpoin
       "id": "asset-id",
       "title": "Support review skill",
       "type": "SKILL",
+      "sourceType": "USER_UPLOAD",
       "url": "/assets/asset-id",
       "downloadUrl": "/api/assets/asset-id/download",
       "summary": "Reusable support review workflow.",
@@ -346,6 +355,9 @@ Returns asset metadata, linked task context when present, and a download endpoin
       "status": "PUBLISHED",
       "downloadCount": 3,
       "likeCount": 1,
+      "license": "MIT",
+      "category": { "id": "category-id", "name": "销售与客户服务", "slug": "customer-service-operations" },
+      "author": { "id": "user-id", "name": "Author", "email": "author@example.com" },
       "task": {
         "id": "task-id",
         "title": "Support review agent",
