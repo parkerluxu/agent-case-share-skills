@@ -51,15 +51,17 @@ For endpoint parameters, response shapes, and examples, read:
    - Read one personal case -> `GET /api/me/cases/:slug`
    - List/filter personal assets -> `GET /api/me/assets`
    - Read one personal asset -> `GET /api/me/assets/:id`
+   - **Download an asset file -> `GET /api/assets/:id/download`**
 4. If the user provides a URL, infer while preserving a single percent-encoding of the path segment:
    - `/tasks/:slug` -> `GET /api/me/cases/:slug`
    - `/assets/:id` -> `GET /api/me/assets/:id`
 5. Fetch JSON and inspect `items`, `case`, or `asset`.
 6. Preserve returned `url` and `downloadUrl` values when reporting results.
-7. If the user wants to edit the asset after finding it, hand off the returned asset `id` to `$publish-agent-case-share`, which owns `PATCH /api/assets/:id`.
-8. If a query is broad, start with `limit=10`; use pagination only when needed.
-9. On `401`, ask for a valid personal API key or signed-in session.
-10. On `404`, report that the item was not found in the authenticated user's library.
+7. If the user wants to download the asset file, use the `downloadUrl` from search/detail results (format: `/api/assets/:id/download`) with `GET` to stream the file content.
+8. If the user wants to edit the asset after finding it, hand off the returned asset `id` to `$publish-agent-case-share`, which owns `PATCH /api/assets/:id`.
+9. If a query is broad, start with `limit=10`; use pagination only when needed.
+10. On `401`, ask for a valid personal API key or signed-in session.
+11. On `404`, report that the item was not found in the authenticated user's library.
 
 ## Query Guidance
 
@@ -68,3 +70,14 @@ For endpoint parameters, response shapes, and examples, read:
 - Use `/api/me/assets` when the user needs asset `type`, `status`, or pagination filters.
 - Omit `status` on `/api/me/cases` and `/api/me/assets` when the user wants all personal statuses; send `status=PUBLISHED`, `HIDDEN`, or `DRAFT` only when requested.
 - Use `/api/me/cases/:slug` before article endpoints when the user wants case context, repositories, or reusable assets for their own case.
+
+## Download Asset
+
+To download an asset file (skill package, prompt template, workflow definition, etc.):
+
+1. Obtain the `downloadUrl` from search results (`/api/me/search`), asset list (`/api/me/assets`), or asset detail (`/api/me/assets/:id`). Format: `/api/assets/:id/download`.
+2. Make a `GET` request to that URL with the same `Authorization: Bearer <personal-api-key>` header.
+3. The response streams the file binary with appropriate `Content-Type` and `Content-Disposition` headers.
+4. Save the file using the `fileName` from the asset metadata (or derive from `downloadUrl`).
+
+**Note**: The download endpoint works for both personal (HIDDEN/DRAFT) and public assets you have access to. No separate "personal download" endpoint exists — the same `/api/assets/:id/download` serves all authorized downloads.

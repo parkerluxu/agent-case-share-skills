@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "agent-case-share-skill",
-      "description": "Search, read, publish, and edit Agent Case Share content.",
+      "description": "Search, retrieve, publish, and edit Agent Case Share content.",
       "source": "./plugins/agent-case-share-skill"
     }
   ]

@@ -20,6 +20,7 @@ Or copy the skill directly:
 cp -R plugins/agent-case-share-skill/skills/publish-agent-case-share ~/.codex/skills/
 cp -R plugins/agent-case-share-skill/skills/search-agent-case-share ~/.codex/skills/
 cp -R plugins/agent-case-share-skill/skills/search-agent-case-share-personal ~/.codex/skills/
+cp -R plugins/agent-case-share-skill/skills/agent-case-share-auto-retrieval ~/.codex/skills/
 ```
 
 ### Claude Code
@@ -38,6 +39,7 @@ mkdir -p ~/.claude/skills
 cp -R plugins/agent-case-share-skill/skills/publish-agent-case-share ~/.claude/skills/
 cp -R plugins/agent-case-share-skill/skills/search-agent-case-share ~/.claude/skills/
 cp -R plugins/agent-case-share-skill/skills/search-agent-case-share-personal ~/.claude/skills/
+cp -R plugins/agent-case-share-skill/skills/agent-case-share-auto-retrieval ~/.claude/skills/
 ```
 
 ### Gemini CLI
@@ -75,6 +77,8 @@ Do not commit real API keys.
 Ask your agent to use `$search-agent-case-share` to search categories, tags, cases, articles, news, projects, papers, or Markdown article content, and to read case, project, paper, or article details by URL or slug.
 
 Ask your agent to use `$search-agent-case-share-personal` to search your own Agent Case Share cases and reusable assets with a personal API key.
+
+Ask your agent to use `$agent-case-share-auto-retrieval` to retrieve relevant cases and reusable assets from your personal library during a conversation.
 
 Ask your agent to use `$publish-agent-case-share` to publish or update a case, article, tutorial, Markdown image, reusable asset, or asset metadata.
 

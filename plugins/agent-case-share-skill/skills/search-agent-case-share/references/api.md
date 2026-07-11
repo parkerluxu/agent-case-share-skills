@@ -384,3 +384,19 @@ Returns asset metadata, linked task context when present, and a download endpoin
 - `404`: content does not exist or is not visible
 
 On failure, show the returned `error` string and ask whether to retry with different filters or credentials.
+
+## Download Asset File
+
+```http
+GET /api/assets/:id/download
+Authorization: Bearer acsp_live_<secret>  # Only required for private assets
+```
+
+Downloads the actual file content for a reusable asset. For public assets, no authentication required. For private/hidden assets, include personal API key.
+
+**Response**: Binary file stream with headers:
+- `Content-Type`: based on file MIME type (e.g., `application/zip`, `text/markdown`)
+- `Content-Disposition`: `attachment; filename="<fileName>"`
+- `Content-Length`: file size in bytes
+
+Save the response body to a file using the `fileName` from asset metadata (or from `Content-Disposition` header).

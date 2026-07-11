@@ -77,3 +77,14 @@ For endpoint parameters, response shapes, and examples, read:
 - Use `/api/projects/:slug` when the user needs the full public project description, repo/site/tutorial URLs, license, or tags.
 - Use `/api/papers/:slug` when the user needs full paper metadata, links, DOI, keywords, notes, or tags.
 - Use `/api/assets` for public asset discovery across the site; use `category` when the user asks for category-specific assets.
+
+## Download Public Asset
+
+To download a public asset file (skill package, prompt template, workflow definition, etc.):
+
+1. Obtain the `downloadUrl` from search results (`/api/search`), asset list (`/api/assets`), or asset detail (`/api/assets/:id`). Format: `/api/assets/:id/download`.
+2. Make a `GET` request to that URL. No authentication required for public assets.
+3. The response streams the file binary with appropriate `Content-Type` and `Content-Disposition` headers.
+4. Save the file using the `fileName` from the asset metadata (or derive from `downloadUrl`).
+
+**Note**: The same `/api/assets/:id/download` endpoint serves both public and authorized private downloads. For personal/hidden assets, include `Authorization: Bearer <personal-api-key>` header.

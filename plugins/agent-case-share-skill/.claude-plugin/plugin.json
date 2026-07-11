@@ -1,7 +1,7 @@
 {
   "name": "agent-case-share-skill",
-  "description": "Search, read, publish, and edit Agent Case Share content and reusable assets.",
-  "version": "0.3.2",
+  "description": "Search, retrieve, publish, and edit Agent Case Share content and reusable assets.",
+  "version": "0.4.0",
   "author": {
     "name": "parkerluxu"
   },

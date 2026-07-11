@@ -1,4 +1,4 @@
 interface:
   display_name: "Search Agent Case Share"
-  short_description: "Search and read Agent Case Share content."
-  default_prompt: "Use $search-agent-case-share to find relevant Agent Case Share cases and articles."
+  short_description: "Search and read Agent Case Share content, and download reusable assets."
+  default_prompt: "Use $search-agent-case-share to find relevant Agent Case Share cases, articles, and download assets."

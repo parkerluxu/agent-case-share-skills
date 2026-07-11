@@ -252,3 +252,19 @@ Returns one authenticated-user-owned reusable asset.
 - `404`: the case or asset does not exist in the authenticated user's library
 
 On failure, show the returned `error` string and ask whether to retry with different filters or credentials.
+
+## Download Asset File
+
+```http
+GET /api/assets/:id/download
+Authorization: Bearer acsp_live_<secret>
+```
+
+Downloads the actual file content for a reusable asset. Works for both personal (HIDDEN/DRAFT) and public assets the user has access to.
+
+**Response**: Binary file stream with headers:
+- `Content-Type`: based on file MIME type (e.g., `application/zip`, `text/markdown`)
+- `Content-Disposition`: `attachment; filename="<fileName>"`
+- `Content-Length`: file size in bytes
+
+Save the response body to a file using the `fileName` from asset metadata (or from `Content-Disposition` header).
