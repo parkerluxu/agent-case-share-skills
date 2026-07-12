@@ -11,7 +11,7 @@ Use this skill to treat Agent Case Share as a readable knowledge base.
 
 - Prefer public read APIs; no API key is needed for published content.
 - Use `https://agentcaseshare.cn/` as the default base URL; ask only for a different site if the user mentions one.
-- Ask for a personal API key only when the user needs hidden or draft content.
+- For hidden or draft content, resolve a personal API key from the Agent Case Share user configuration file before environment variables. If it is missing, invoke `$configure-agent-case-share`; do not ask the user to paste a key into chat.
 - Treat the API key as a secret. Do not print it, commit it, log it, or include it in generated files.
 - Cite returned `url` values when summarizing or reusing content.
 
@@ -23,7 +23,13 @@ Confirm:
 - What to find or read: categories, tags, cases, articles, news, projects, papers, assets, a specific slug/id, or a URL
 - Optional personal API key for private content
 
-Environment variables, when available:
+User configuration takes precedence and is created by `$configure-agent-case-share`:
+
+- Windows: `%APPDATA%\\agent-case-share\\config.json`
+- macOS: `~/Library/Application Support/agent-case-share/config.json`
+- Linux: `$XDG_CONFIG_HOME/agent-case-share/config.json` or `~/.config/agent-case-share/config.json`
+
+Compatible environment variables, when available:
 
 - `AGENT_CASE_SHARE_BASE_URL`
 - `AGENT_CASE_SHARE_API_KEY`
@@ -44,7 +50,7 @@ For endpoint parameters, response shapes, and examples, read:
 
 ## Workflow
 
-1. Resolve the base URL from `AGENT_CASE_SHARE_BASE_URL`, the user, or default to `https://agentcaseshare.cn/`.
+1. Resolve settings from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`. For private requests, also resolve `AGENT_CASE_SHARE_API_KEY`; if no key is available, invoke `$configure-agent-case-share`.
 2. Classify the request:
    - Category discovery -> `GET /api/categories`
    - Tag discovery -> `GET /api/tags`

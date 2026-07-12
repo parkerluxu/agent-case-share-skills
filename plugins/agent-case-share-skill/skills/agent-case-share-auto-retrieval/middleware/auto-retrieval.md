@@ -25,9 +25,10 @@ Main entry point that coordinates the full auto-retrieval pipeline:
     "trigger_on_new_conversation": true,
     "trigger_on_explicit_call": true
   },
-  "env": {
-    "AGENT_CASE_SHARE_BASE_URL": "string",
-    "AGENT_CASE_SHARE_API_KEY": "string"
+  "credentials": {
+    "source": "user_config|environment|session",
+    "base_url": "string",
+    "api_key": "string"
   }
 }
 ```
@@ -202,7 +203,7 @@ async def on_user_message(user_message, conversation_history, session_state):
         "is_new_conversation": len(conversation_history) == 0,
         "explicit_skill_call": detect_explicit_skill_call(user_message),
         "config": session_state.get("auto_retrieval_config", DEFAULT_CONFIG),
-        "env": get_env_vars()
+    "credentials": resolve_agent_case_share_credentials()
     })
 
     # 3. If context was injected, prepend to conversation

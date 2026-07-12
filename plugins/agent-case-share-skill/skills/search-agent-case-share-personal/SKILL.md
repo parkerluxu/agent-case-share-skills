@@ -10,7 +10,7 @@ Use this skill to query the current user's private Agent Case Share library.
 ## Safety
 
 - Require a signed-in browser session or `Authorization: Bearer <personal-api-key>` for every `/api/me/*` request.
-- Ask for the personal API key if it is missing and no browser session is available.
+- If no browser session is available, resolve the personal API key from the Agent Case Share user configuration file before environment variables. If it is still missing, invoke `$configure-agent-case-share`; do not ask the user to paste a key into chat.
 - Treat the API key as a secret. Do not print it, commit it, log it, or include it in generated files.
 - Use `https://agentcaseshare.cn/` as the default base URL; ask only for a different site if the user mentions one.
 - Do not use public endpoints when the user specifically asks for "my" content, because public endpoints may omit hidden, draft, or user-owned context.
@@ -23,7 +23,13 @@ Confirm:
 - Personal API key generated from `/profile`, unless a signed-in browser session is available
 - Whether the user wants personal cases, personal assets, one case/asset detail, or mixed personal search
 
-Environment variables, when available:
+User configuration takes precedence and is created by `$configure-agent-case-share`:
+
+- Windows: `%APPDATA%\\agent-case-share\\config.json`
+- macOS: `~/Library/Application Support/agent-case-share/config.json`
+- Linux: `$XDG_CONFIG_HOME/agent-case-share/config.json` or `~/.config/agent-case-share/config.json`
+
+Compatible environment variables, when available:
 
 - `AGENT_CASE_SHARE_BASE_URL`
 - `AGENT_CASE_SHARE_API_KEY`
@@ -43,8 +49,8 @@ For endpoint parameters, response shapes, and examples, read:
 
 ## Workflow
 
-1. Resolve the base URL from `AGENT_CASE_SHARE_BASE_URL`, the user, or default to `https://agentcaseshare.cn/`.
-2. Use `Authorization: Bearer <personal-api-key>` for external scripts and agents.
+1. Resolve credentials from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_API_KEY` and `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`. If no key is available, invoke `$configure-agent-case-share` before making an authenticated request.
+2. Use `Authorization: Bearer <personal-api-key>` for external scripts and agents without printing the key.
 3. Classify the request:
    - Search personal cases and assets together -> `GET /api/me/search`
    - List/filter personal cases -> `GET /api/me/cases`
@@ -60,7 +66,7 @@ For endpoint parameters, response shapes, and examples, read:
 7. If the user wants to download the asset file, use the `downloadUrl` from search/detail results (format: `/api/assets/:id/download`) with `GET` to stream the file content.
 8. If the user wants to edit the asset after finding it, hand off the returned asset `id` to `$publish-agent-case-share`, which owns `PATCH /api/assets/:id`.
 9. If a query is broad, start with `limit=10`; use pagination only when needed.
-10. On `401`, ask for a valid personal API key or signed-in session.
+10. On `401`, tell the user that credentials need updating and invoke `$configure-agent-case-share` or use a signed-in session.
 11. On `404`, report that the item was not found in the authenticated user's library.
 
 ## Query Guidance

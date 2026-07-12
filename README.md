@@ -21,6 +21,7 @@ cp -R plugins/agent-case-share-skill/skills/publish-agent-case-share ~/.codex/sk
 cp -R plugins/agent-case-share-skill/skills/search-agent-case-share ~/.codex/skills/
 cp -R plugins/agent-case-share-skill/skills/search-agent-case-share-personal ~/.codex/skills/
 cp -R plugins/agent-case-share-skill/skills/agent-case-share-auto-retrieval ~/.codex/skills/
+cp -R plugins/agent-case-share-skill/skills/configure-agent-case-share ~/.codex/skills/
 ```
 
 ### Claude Code
@@ -40,6 +41,7 @@ cp -R plugins/agent-case-share-skill/skills/publish-agent-case-share ~/.claude/s
 cp -R plugins/agent-case-share-skill/skills/search-agent-case-share ~/.claude/skills/
 cp -R plugins/agent-case-share-skill/skills/search-agent-case-share-personal ~/.claude/skills/
 cp -R plugins/agent-case-share-skill/skills/agent-case-share-auto-retrieval ~/.claude/skills/
+cp -R plugins/agent-case-share-skill/skills/configure-agent-case-share ~/.claude/skills/
 ```
 
 ### Gemini CLI
@@ -56,11 +58,31 @@ For local development:
 gemini extensions link .
 ```
 
-## Optional Secrets
+## Desktop Setup
 
 Search and read APIs work without a key for published content.
 
-Create a personal API key from your Agent Case Share `/profile` page when publishing content or reading hidden/draft content.
+Create a personal API key from your Agent Case Share `/profile` page when publishing content, reading hidden/draft content, or using personal retrieval. Then ask your agent to use `$configure-agent-case-share`. It guides you to run its local setup command and stores credentials outside the workspace:
+
+- Windows: `%APPDATA%\\agent-case-share\\config.json`
+- macOS: `~/Library/Application Support/agent-case-share/config.json`
+- Linux: `$XDG_CONFIG_HOME/agent-case-share/config.json` or `~/.config/agent-case-share/config.json`
+
+From a clone of this repository, the command is:
+
+```bash
+node plugins/agent-case-share-skill/skills/configure-agent-case-share/scripts/configure.mjs
+```
+
+It hides the key while typing. Verify the setup without exposing credentials:
+
+```bash
+node plugins/agent-case-share-skill/skills/configure-agent-case-share/scripts/configure.mjs --status
+```
+
+## CLI and CI Compatibility
+
+Desktop configuration takes precedence. Environment variables remain supported for CLI, CI, and Gemini extension settings:
 
 Use these environment variables in your shell or agent runtime:
 
@@ -77,6 +99,8 @@ Do not commit real API keys.
 Ask your agent to use `$search-agent-case-share` to search categories, tags, cases, articles, news, projects, papers, or Markdown article content, and to read case, project, paper, or article details by URL or slug.
 
 Ask your agent to use `$search-agent-case-share-personal` to search your own Agent Case Share cases and reusable assets with a personal API key.
+
+Ask your agent to use `$configure-agent-case-share` to configure, verify, update, or clear local Agent Case Share credentials.
 
 Ask your agent to use `$agent-case-share-auto-retrieval` to retrieve relevant cases and reusable assets from your personal library during a conversation.
 

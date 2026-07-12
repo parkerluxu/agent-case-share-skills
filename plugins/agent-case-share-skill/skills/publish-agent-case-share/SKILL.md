@@ -11,7 +11,7 @@ Use this skill to publish content to the Agent Case Share platform.
 
 - Never ask for the user's password.
 - Use `https://agentcaseshare.cn/` as the default base URL; ask only for a different site if the user mentions one.
-- Ask for the personal API key if it is missing.
+- Resolve credentials from the user configuration file before using environment variables. If a required key is missing, invoke `$configure-agent-case-share`; do not ask the user to paste a key into chat.
 - Treat the API key as a secret. Do not print it, commit it, log it, or include it in generated files.
 - Default AI-generated tasks to `visibility: "HIDDEN"`.
 - Default AI-generated articles to `status: "DRAFT"`.
@@ -23,7 +23,7 @@ Use this skill to publish content to the Agent Case Share platform.
 Confirm:
 
 - Base URL, default `https://agentcaseshare.cn/`
-- Personal API key generated from `/profile`
+- Personal API key generated from `/profile`, resolved through `$configure-agent-case-share` or the compatible environment variables
 - Whether the user wants to create, edit, or delete a task/case, article/tutorial, Markdown image, case-attached reusable asset, standalone user asset, asset metadata, or a combination
 
 ## Reference
@@ -56,7 +56,7 @@ For endpoint fields, payload examples, responses, and error handling, read:
    - Article/tutorial deletion -> `DELETE /api/articles/:slug`
 2. If Markdown contains local image paths, upload each image first and replace local paths with returned URLs.
 3. Normalize content into the required payload.
-4. Resolve the base URL from `AGENT_CASE_SHARE_BASE_URL`, the user, or default to `https://agentcaseshare.cn/`.
+4. Resolve credentials from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_API_KEY` and `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`.
 5. Use `Authorization: Bearer <personal-api-key>`.
 6. Use hidden/draft defaults unless the user requested public publishing.
 7. For assets that should appear on a case, upload files to `POST /api/assets` first and place returned draft `asset` objects into `reusableAssets` when creating or updating the task.

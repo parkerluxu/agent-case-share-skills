@@ -1,0 +1,4 @@
+interface:
+  display_name: "Configure Agent Case Share"
+  short_description: "Set up or update local Agent Case Share credentials."
+  default_prompt: "Use $configure-agent-case-share to set up my Agent Case Share account."

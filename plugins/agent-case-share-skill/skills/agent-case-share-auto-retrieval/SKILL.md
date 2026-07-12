@@ -56,6 +56,8 @@ Environment variables:
 - `AGENT_CASE_SHARE_BASE_URL` (default: `https://agentcaseshare.cn/`)
 - `AGENT_CASE_SHARE_API_KEY` (personal API key from `/profile`)
 
+Desktop configuration takes precedence over these compatible environment variables. It is created by `$configure-agent-case-share` at `%APPDATA%\\agent-case-share\\config.json` on Windows, `~/Library/Application Support/agent-case-share/config.json` on macOS, or `$XDG_CONFIG_HOME/agent-case-share/config.json` (fallback `~/.config/agent-case-share/config.json`) on Linux. If no key is configured, invoke `$configure-agent-case-share` and continue without retrieval until setup completes.
+
 Skill configuration (can be overridden per session):
 ```yaml
 auto_retrieval:
@@ -118,7 +120,7 @@ Required: `search-agent-case-share-personal` must be installed and configured wi
 ## Privacy
 
 - Only searches **personal** library (`/api/me/*` endpoints)
-- Requires personal API key or signed-in session
+- Requires personal API key from `$configure-agent-case-share`, compatible environment variables, or a signed-in session
 - Never sends data to public endpoints
 - Results injected only into current conversation context
 
