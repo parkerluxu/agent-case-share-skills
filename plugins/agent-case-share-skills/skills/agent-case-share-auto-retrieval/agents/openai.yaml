@@ -1,4 +1,0 @@
-interface:
-  display_name: "Agent Case Share Auto Retrieval"
-  short_description: "Automatically retrieve relevant personal cases/assets during conversations."
-  default_prompt: "Use $agent-case-share-auto-retrieval to enable zero-perception reuse of your personal Agent Case Share library."

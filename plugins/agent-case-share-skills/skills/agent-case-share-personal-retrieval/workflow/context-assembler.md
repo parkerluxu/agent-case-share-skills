@@ -1,6 +1,6 @@
-# Context Injector Middleware
+# Personal Context Assembler
 
-Formats search results from `search-agent-case-share-personal` and injects them into the conversation context for the main model.
+Formats relevant results from `search-agent-case-share-personal` as reference context for the current task. This Markdown file does not perform API calls; the Agent uses it after the retrieval decision and detail lookup.
 
 ## Input
 
@@ -9,30 +9,57 @@ Formats search results from `search-agent-case-share-personal` and injects them 
   "search_results": {                 // Raw response from GET /api/me/search
     "items": [
       {
-        "type": "case|asset",
+        "type": "case",
         "id": "string",
         "title": "string",
-        "slug": "string|null",        // For cases
+        "slug": "string",
         "url": "string",
-        "excerpt": "string|null",     // For search results
-        "summary": "string|null",     // For case/detail
+        "excerpt": "string|null",
         "status": "string",
-        "tags": [{"id": "string", "name": "string", "slug": "string"}],
-        // Case-specific fields (from detail endpoint):
-        "problem": "string|null",
-        "solution": "string|null",
-        "workflow": "string|null",
-        "impact": "string|null",
-        "reusableAssets": [...],
-        // Asset-specific fields (from detail endpoint):
-        "assetType": "string|null",   // SKILL, PROMPT, WORKFLOW, TEMPLATE, MCP_CONFIG, OTHER
-        "downloadUrl": "string|null",
-        "version": "string|null",
+        "tags": [{"id": "string", "name": "string", "slug": "string"}]
+      },
+      {
+        "type": "asset",
+        "id": "string",
+        "title": "string",
+        "url": "string",
+        "downloadUrl": "string",
+        "excerpt": "string|null",
+        "status": "string",
+        "assetType": "string",        // SKILL, PROMPT, WORKFLOW, TEMPLATE, MCP_CONFIG, OTHER
+        "sourceType": "string",       // OPEN_SOURCE, USER_UPLOAD, CASE_EXTRACTED
+        "category": "object|null",
         "fileName": "string|null",
-        "sourceType": "string|null"
+        "task": "object|null"
       }
     ],
     "limit": 10
+  },
+  "case_details": [                     // Optional details fetched from /api/me/cases/:slug
+    {
+      "slug": "string",
+      "summary": "string",
+      "problem": "string",
+      "solution": "string",
+      "workflow": "string",
+      "impact": "string",
+      "reusableAssets": [...]
+    }
+  ],
+  "asset_details": [                    // Optional details fetched from /api/me/assets/:id
+    {
+      "id": "string",
+      "summary": "string",
+      "version": "string",
+      "fileName": "string|null",
+      "mimeType": "string",
+      "downloadUrl": "string"
+    }
+  ],
+  "request": {
+    "query": "string|null",
+    "case_slugs": ["string"],
+    "asset_ids": ["string"]
   },
   "extracted_keywords": {             // Output from keyword-extractor
     "keywords": ["string"],
@@ -54,13 +81,13 @@ Formats search results from `search-agent-case-share-personal` and injects them 
 
 ```json
 {
-  "injected_context": "string",       // Formatted context block to prepend to conversation
-  "injected_asset_ids": ["string"],   // Asset IDs that were injected (for reference)
-  "injected_case_slugs": ["string"]   // Case slugs that were injected
+  "reference_context": "string",      // Formatted reference block for the current task
+  "selected_asset_ids": ["string"],   // Asset IDs included as reference
+  "selected_case_slugs": ["string"]  // Case slugs included as reference
 }
 ```
 
-## Injection Templates
+## Reference Templates
 
 ### Template: `default` (Balanced)
 
@@ -83,11 +110,11 @@ Formats search results from `search-agent-case-share-personal` and injects them 
 ```
 ### {title} ({status})
 - **链接**: {url}
-- **问题**: {problem或excerpt或summary前200字}
-- **方案**: {solution或"见详情"}
-- **影响**: {impact或"见详情"}
+- **问题**: {case_details.problem或excerpt前200字}
+- **方案**: {case_details.solution或"见详情"}
+- **影响**: {case_details.impact或"见详情"}
 - **标签**: {tag_names_joined}
-- **关联资产**: {reusable_asset_titles_joined或"无"}
+- **关联资产**: {case_details.reusable_asset_titles_joined或"无"}
 - **Slug**: {slug}  # 用于后续详情查询
 ```
 
@@ -96,9 +123,9 @@ Formats search results from `search-agent-case-share-personal` and injects them 
 ### {title} ({assetType})  [{status}]
 - **链接**: {url}
 - **下载**: {downloadUrl}
-- **摘要**: {summary或excerpt}
-- **版本**: {version或"未标注"}
-- **文件**: {fileName}
+- **摘要**: {asset_details.summary或excerpt}
+- **版本**: {asset_details.version或"未标注"}
+- **文件**: {asset_details.fileName或fileName}
 - **Asset ID**: {id}  # 用于下载/安装/编辑
 ```
 
@@ -111,8 +138,8 @@ Formats search results from `search-agent-case-share-personal` and injects them 
 意图：{intent_summary}
 ```
 
-**Case Line:** `- {title} [{status}] {problem或excerpt前100字} (slug: {slug})`
-**Asset Line:** `- {title} [{assetType}] {summary前100字} (id: {id})`
+**Case Line:** `- {title} [{status}] {case_details.problem或excerpt前100字} (slug: {slug})`
+**Asset Line:** `- {title} [{assetType}] {asset_details.summary或excerpt前100字} (id: {id})`
 
 ### Template: `detailed` (Full context, for complex tasks)
 
@@ -137,12 +164,12 @@ Formats search results from `search-agent-case-share-personal` and injects them 
 - 如需基于此经验开始新任务：直接告诉我，我会结合上述经验辅助你
 ```
 
-**Case Detailed Block:** Full problem/solution/workflow/impact + reusable assets list
-**Asset Detailed Block:** Full summary + version + fileName + downloadUrl
+**Case Detailed Block:** Full problem/solution/workflow/impact + reusable assets list from `case_details`.
+**Asset Detailed Block:** Full summary + version + fileName + downloadUrl from `asset_details`.
 
-## Filtering & Ranking
+## Candidate Filtering & Ranking
 
-Before formatting, filter and rank results:
+For a broad query, filtering and ranking may help identify candidates. Format the relevant results and fetched details; ask the user only when candidates are equally relevant or conflicting. Do not expand the selection silently beyond the relevance threshold.
 
 1. **Relevance scoring** (simple heuristic):
    - Keyword overlap with extracted_keywords.keywords (weight: 3)
@@ -154,14 +181,14 @@ Before formatting, filter and rank results:
 
 2. **Threshold**: Keep items with score >= `config.min_relevance_score * max_possible_score`
 
-3. **Limit**: Top `config.max_results` items total (cases + assets combined)
+3. **Limit**: Show at most `config.max_results` candidates (cases + assets combined) before selection
 
 4. **Deduplication**: If same case appears with multiple assets, merge
 
 ## Special Handling
 
 ### Cases with Reusable Assets
-If a case has `reusableAssets`, include them inline in the case block and ALSO list separately in assets section (marked with `来源案例: {case_title}`).
+If a fetched case detail has `reusableAssets`, include them inline in the case block and ALSO list separately in assets section (marked with `来源案例: {case_title}`).
 
 ### Skill Assets (type=SKILL)
 Add special note: `💡 可直接安装使用：下载后解压到 .claude/skills/ 目录`
@@ -170,32 +197,32 @@ Add special note: `💡 可直接安装使用：下载后解压到 .claude/skill
 Show status clearly: `🔒 隐私` (HIDDEN), `📝 草稿` (DRAFT), `🌐 公开` (PUBLISHED)
 
 ### Empty Results
-If no results after filtering:
+If no selected results remain after filtering, return an empty reference context and report that no personal items were selected. If the user explicitly wants an empty-state message, it may use:
 ```
 【你的个人资产库暂无相关经验】
 检索意图：{intent_summary}
 建议：上传相关案例/技能到个人库，或调整关键词重试
 ```
 
-## Injection Point
+## Context Handoff
 
-The `injected_context` should be inserted as a **system-level context block** BEFORE the current user message, with a clear delimiter:
+After the retrieval decision and detail lookup, the Agent may add `reference_context` before the current task instructions with a clear delimiter. The assembled content is reference material, not a replacement for the user's request:
 
 ```
-<system-context source="agent-case-share-auto-retrieval">
-{injected_context}
-</system-context>
+<personal-library-reference>
+{reference_context}
+</personal-library-reference>
 
 <user-message>
 {current_user_message}
 </user-message>
 ```
 
-This ensures the main model sees it as contextual knowledge, not as user speech.
+This keeps the selected personal material separate from the current user instruction.
 
 ## Example Output (default template)
 
-**Input:** Search returned 1 case + 2 assets for "电商推荐系统 向量检索 Milvus"
+**Input:** The user requested "电商推荐系统 向量检索 Milvus"; the agent selected 1 case and 2 assets and fetched the case detail before formatting.
 
 **Output:**
 ```

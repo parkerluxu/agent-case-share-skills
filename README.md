@@ -20,7 +20,7 @@ Or copy the skill directly:
 cp -R plugins/agent-case-share-skills/skills/publish-agent-case-share ~/.codex/skills/
 cp -R plugins/agent-case-share-skills/skills/search-agent-case-share ~/.codex/skills/
 cp -R plugins/agent-case-share-skills/skills/search-agent-case-share-personal ~/.codex/skills/
-cp -R plugins/agent-case-share-skills/skills/agent-case-share-auto-retrieval ~/.codex/skills/
+cp -R plugins/agent-case-share-skills/skills/agent-case-share-personal-retrieval ~/.codex/skills/
 cp -R plugins/agent-case-share-skills/skills/configure-agent-case-share ~/.codex/skills/
 ```
 
@@ -40,7 +40,7 @@ mkdir -p ~/.claude/skills
 cp -R plugins/agent-case-share-skills/skills/publish-agent-case-share ~/.claude/skills/
 cp -R plugins/agent-case-share-skills/skills/search-agent-case-share ~/.claude/skills/
 cp -R plugins/agent-case-share-skills/skills/search-agent-case-share-personal ~/.claude/skills/
-cp -R plugins/agent-case-share-skills/skills/agent-case-share-auto-retrieval ~/.claude/skills/
+cp -R plugins/agent-case-share-skills/skills/agent-case-share-personal-retrieval ~/.claude/skills/
 cp -R plugins/agent-case-share-skills/skills/configure-agent-case-share ~/.claude/skills/
 ```
 
@@ -102,7 +102,7 @@ Ask your agent to use `$search-agent-case-share-personal` to search your own Age
 
 Ask your agent to use `$configure-agent-case-share` to configure, verify, update, or clear local Agent Case Share credentials.
 
-Ask your agent to use `$agent-case-share-auto-retrieval` to retrieve relevant cases and reusable assets from your personal library during a conversation.
+Use `$agent-case-share-personal-retrieval` when the current task would benefit from your prior cases or reusable assets. The Agent may proactively retrieve relevant personal context for substantive tasks; explicit invocation or a direct request to search/reuse the library always triggers retrieval.
 
 Ask your agent to use `$publish-agent-case-share` to publish or update a case, article, tutorial, Markdown image, reusable asset, or asset metadata.
 

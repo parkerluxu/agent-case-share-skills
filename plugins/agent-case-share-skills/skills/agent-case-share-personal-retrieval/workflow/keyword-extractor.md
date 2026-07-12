@@ -1,4 +1,4 @@
-# Keyword Extractor Middleware
+# Personal Retrieval Keyword Extractor
 
 Extracts structured search keywords from user messages for querying the personal asset library.
 
@@ -10,7 +10,7 @@ Extracts structured search keywords from user messages for querying the personal
   "conversation_history": [
     {"role": "user|assistant", "content": "string"}
   ],
-  "trigger_reason": "string"
+  "request_context": "string"
 }
 ```
 
