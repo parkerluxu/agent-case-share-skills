@@ -23,7 +23,7 @@ Use this skill to configure the current user's local Agent Case Share credential
    ```bash
    node /absolute/path/to/configure-agent-case-share/scripts/configure.mjs
    ```
-2. The script securely prompts for the personal API key from the Agent Case Share `/profile` page and optionally a custom base URL.
+2. The script securely prompts for the personal API key from the Agent Case Share `/profile` page and saves the default base URL `https://agentcaseshare.cn/` automatically.
 3. To verify setup without exposing the key, run:
    ```bash
    node /absolute/path/to/configure-agent-case-share/scripts/configure.mjs --status
@@ -39,7 +39,7 @@ Use this skill to configure the current user's local Agent Case Share credential
 Other Agent Case Share skills resolve settings in this order:
 
 1. The user configuration file written by this skill.
-2. `AGENT_CASE_SHARE_API_KEY` and `AGENT_CASE_SHARE_BASE_URL` environment variables for CLI, CI, or Gemini extension compatibility.
+2. `AGENT_CASE_SHARE_API_KEY` and optional `AGENT_CASE_SHARE_BASE_URL` environment variables for CLI, CI, or Gemini extension compatibility.
 3. The default base URL `https://agentcaseshare.cn/` for unauthenticated public reads.
 
 If authentication is required and neither the user configuration file nor an environment variable provides a key, invoke this skill. Do not request the key in conversation as a fallback.

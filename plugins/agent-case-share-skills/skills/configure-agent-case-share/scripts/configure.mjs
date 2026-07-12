@@ -3,7 +3,6 @@
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import readline from "node:readline/promises";
 
 const DEFAULT_BASE_URL = "https://agentcaseshare.cn/";
 
@@ -14,7 +13,6 @@ Options:
   --status                 Show whether configuration exists without revealing the API key.
   --clear                  Delete the saved configuration.
   --api-key <key>          Set the API key non-interactively (for automation only).
-  --base-url <url>         Set a custom Agent Case Share base URL.
   --help                   Show this help message.`);
 }
 
@@ -30,25 +28,8 @@ function configPath() {
   return path.join(process.env.XDG_CONFIG_HOME || path.join(os.homedir(), ".config"), "agent-case-share", "config.json");
 }
 
-function normalizeBaseUrl(value) {
-  const candidate = (value || DEFAULT_BASE_URL).trim();
-  let url;
-
-  try {
-    url = new URL(candidate);
-  } catch {
-    throw new Error("Base URL must be a valid http or https URL.");
-  }
-
-  if (url.protocol !== "https:" && url.protocol !== "http:") {
-    throw new Error("Base URL must use http or https.");
-  }
-
-  return url.toString();
-}
-
 function parseArgs(args) {
-  const options = { status: false, clear: false, apiKey: undefined, baseUrl: undefined };
+  const options = { status: false, clear: false, apiKey: undefined };
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -56,12 +37,12 @@ function parseArgs(args) {
       options.status = true;
     } else if (arg === "--clear") {
       options.clear = true;
-    } else if (arg === "--api-key" || arg === "--base-url") {
+    } else if (arg === "--api-key") {
       const value = args[index + 1];
       if (!value || value.startsWith("--")) {
         throw new Error(`${arg} requires a value.`);
       }
-      options[arg === "--api-key" ? "apiKey" : "baseUrl"] = value;
+      options.apiKey = value;
       index += 1;
     } else if (arg === "--help" || arg === "-h") {
       options.help = true;
@@ -70,7 +51,7 @@ function parseArgs(args) {
     }
   }
 
-  if ([options.status, options.clear].filter(Boolean).length > 1 || ((options.status || options.clear) && (options.apiKey || options.baseUrl))) {
+  if ([options.status, options.clear].filter(Boolean).length > 1 || ((options.status || options.clear) && options.apiKey)) {
     throw new Error("--status and --clear cannot be combined with other options.");
   }
 
@@ -82,7 +63,7 @@ async function readConfig(filePath) {
     const parsed = JSON.parse(await readFile(filePath, "utf8"));
     return {
       apiKey: typeof parsed.apiKey === "string" ? parsed.apiKey.trim() : "",
-      baseUrl: typeof parsed.baseUrl === "string" ? normalizeBaseUrl(parsed.baseUrl) : DEFAULT_BASE_URL,
+      baseUrl: DEFAULT_BASE_URL,
     };
   } catch (error) {
     if (error.code === "ENOENT") {
@@ -144,16 +125,6 @@ async function promptSecret(message) {
   });
 }
 
-async function promptBaseUrl(defaultValue) {
-  const terminal = readline.createInterface({ input: process.stdin, output: process.stdout });
-  try {
-    const answer = await terminal.question(`Base URL [${defaultValue}]: `);
-    return answer.trim() || defaultValue;
-  } finally {
-    terminal.close();
-  }
-}
-
 async function writeConfig(filePath, config) {
   const directory = path.dirname(filePath);
   await mkdir(directory, { recursive: true, mode: 0o700 });
@@ -204,12 +175,7 @@ async function main() {
     throw new Error("An API key is required.");
   }
 
-  const defaultBaseUrl = existing?.baseUrl || DEFAULT_BASE_URL;
-  const baseUrlInput = options.baseUrl || (process.stdin.isTTY && process.stdout.isTTY
-    ? await promptBaseUrl(defaultBaseUrl)
-    : defaultBaseUrl);
-  const baseUrl = normalizeBaseUrl(baseUrlInput);
-  await writeConfig(filePath, { apiKey, baseUrl });
+  await writeConfig(filePath, { apiKey, baseUrl: DEFAULT_BASE_URL });
   console.log(`Agent Case Share configured. Config file: ${filePath}`);
 }
 

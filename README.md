@@ -90,7 +90,7 @@ Use these environment variables in your shell or agent runtime:
 AGENT_CASE_SHARE_API_KEY=acsp_live_replace_me
 ```
 
-The base URL defaults to `https://agentcaseshare.cn/`. Set `AGENT_CASE_SHARE_BASE_URL` only when targeting a different Agent Case Share deployment.
+The setup command always saves `https://agentcaseshare.cn/` as the base URL. Set optional `AGENT_CASE_SHARE_BASE_URL` only for CLI or CI runs targeting a different Agent Case Share deployment.
 
 Do not commit real API keys.
 
