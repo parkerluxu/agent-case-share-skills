@@ -12,6 +12,9 @@ Use this skill to query the current user's private Agent Case Share library.
 - Require a signed-in browser session or `Authorization: Bearer <personal-api-key>` for every `/api/me/*` request.
 - If no browser session is available, resolve the personal API key from the Agent Case Share user configuration file before environment variables. If it is still missing, invoke `$configure-agent-case-share`; do not ask the user to paste a key into chat.
 - Treat the API key as a secret. Do not print it, commit it, log it, or include it in generated files.
+- Set `User-Agent: AgentCaseShare-AIClient/1.0` and `Accept: application/json` explicitly on every Agent Case Share HTTP request. Do not rely on the default User-Agent of Python `urllib`, curl, Node `fetch`, or any other client, and do not impersonate a browser User-Agent.
+- For JSON requests, also set `Content-Type: application/json`. For downloads and other non-JSON responses, still send the fixed User-Agent and `Accept: application/json`; retain the required bearer token without exposing it.
+- If a response body contains `cloudflare_error: true`, `error_code: 1010`, or `browser_signature_banned`, do not retry automatically. Report that Cloudflare blocked the request before it reached the API, and ask the site administrator to review the Browser Integrity Check rule for `/api/*` and allow `AgentCaseShare-AIClient/1.0`.
 - Use `https://agentcaseshare.cn/` as the default base URL; ask only for a different site if the user mentions one.
 - Do not use public endpoints when the user specifically asks for "my" content, because public endpoints may omit hidden, draft, or user-owned context.
 
@@ -50,7 +53,7 @@ For endpoint parameters, response shapes, and examples, read:
 ## Workflow
 
 1. Resolve credentials from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_API_KEY` and `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`. If no key is available, invoke `$configure-agent-case-share` before making an authenticated request.
-2. Use `Authorization: Bearer <personal-api-key>` for external scripts and agents without printing the key.
+2. Use `Authorization: Bearer <personal-api-key>` without printing the key, plus the required explicit `User-Agent` and `Accept` headers. Add `Content-Type: application/json` for JSON requests.
 3. Classify the request:
    - Search personal cases and assets together -> `GET /api/me/search`
    - List/filter personal cases -> `GET /api/me/cases`
@@ -68,6 +71,7 @@ For endpoint parameters, response shapes, and examples, read:
 9. If a query is broad, start with `limit=10`; use pagination only when needed.
 10. On `401`, tell the user that credentials need updating and invoke `$configure-agent-case-share` or use a signed-in session.
 11. On `404`, report that the item was not found in the authenticated user's library.
+12. On a Cloudflare 1010 signature block, do not retry; report that the request was intercepted before the API and direct the site administrator to allow the fixed AI client User-Agent for `/api/*`.
 
 ## Query Guidance
 
@@ -82,7 +86,7 @@ For endpoint parameters, response shapes, and examples, read:
 To download an asset file (skill package, prompt template, workflow definition, etc.):
 
 1. Obtain the `downloadUrl` from search results (`/api/me/search`), asset list (`/api/me/assets`), or asset detail (`/api/me/assets/:id`). Format: `/api/assets/:id/download`.
-2. Make a `GET` request to that URL with the same `Authorization: Bearer <personal-api-key>` header.
+2. Make a `GET` request to that URL with `User-Agent: AgentCaseShare-AIClient/1.0`, `Accept: application/json`, and the same `Authorization: Bearer <personal-api-key>` header.
 3. The response streams the file binary with appropriate `Content-Type` and `Content-Disposition` headers.
 4. Save the file using the `fileName` from the asset metadata (or derive from `downloadUrl`).
 

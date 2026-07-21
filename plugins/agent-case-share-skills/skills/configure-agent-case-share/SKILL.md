@@ -11,6 +11,7 @@ Use this skill to configure the current user's local Agent Case Share credential
 
 - Do not ask the user to paste an API key into chat.
 - Do not print, log, commit, or include the API key in generated files.
+- This configuration skill makes no Agent Case Share HTTP request. If it is extended to do so, explicitly set `User-Agent: AgentCaseShare-AIClient/1.0` and `Accept: application/json`; add `Content-Type: application/json` for JSON requests, never rely on Python `urllib`, curl, Node `fetch`, or another default User-Agent, and never impersonate a browser.
 - Run the bundled `scripts/configure.mjs` script from this skill directory. It prompts for the key without echoing it and stores it outside the workspace.
 - The script stores configuration in a user-only location:
   - Windows: `%APPDATA%\\agent-case-share\\config.json`

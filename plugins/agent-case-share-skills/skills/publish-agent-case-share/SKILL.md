@@ -13,6 +13,9 @@ Use this skill to publish content to the Agent Case Share platform.
 - Use `https://agentcaseshare.cn/` as the default base URL; ask only for a different site if the user mentions one.
 - Resolve credentials from the user configuration file before using environment variables. If a required key is missing, invoke `$configure-agent-case-share`; do not ask the user to paste a key into chat.
 - Treat the API key as a secret. Do not print it, commit it, log it, or include it in generated files.
+- Set `User-Agent: AgentCaseShare-AIClient/1.0`, `Accept: application/json`, and `Authorization: Bearer <personal-api-key>` explicitly on every authenticated Agent Case Share request. Do not rely on the default User-Agent of Python `urllib`, curl, Node `fetch`, or any other client, and do not impersonate a browser User-Agent.
+- For JSON requests, set `Content-Type: application/json`. For `POST /api/content-images`, `POST /api/assets`, and `POST /api/assets/user`, use multipart form data without manually setting a `Content-Type` boundary; let curl `-F`, `fetch` `FormData`, or the HTTP client generate it.
+- If a response body contains `cloudflare_error: true`, `error_code: 1010`, or `browser_signature_banned`, do not retry automatically. Report that Cloudflare blocked the request before it reached the API, and ask the site administrator to review the Browser Integrity Check rule for `/api/*` and allow `AgentCaseShare-AIClient/1.0`.
 - Default AI-generated tasks to `visibility: "HIDDEN"`.
 - Default AI-generated articles to `status: "DRAFT"`.
 - Default AI-generated standalone user assets to `visibility: "HIDDEN"`.
@@ -57,14 +60,14 @@ For endpoint fields, payload examples, responses, and error handling, read:
 2. If Markdown contains local image paths, upload each image first and replace local paths with returned URLs.
 3. Normalize content into the required payload.
 4. Resolve credentials from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_API_KEY` and `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`.
-5. Use `Authorization: Bearer <personal-api-key>`.
+5. Use `Authorization: Bearer <personal-api-key>` together with the fixed explicit `User-Agent` and `Accept` headers. Set `Content-Type: application/json` for JSON bodies; allow the HTTP client to set multipart boundaries for uploads.
 6. Use hidden/draft defaults unless the user requested public publishing.
 7. For assets that should appear on a case, upload files to `POST /api/assets` first and place returned draft `asset` objects into `reusableAssets` when creating or updating the task.
 8. For assets that should exist in the user's asset library independent of a case, upload files to `POST /api/assets/user` and report the returned `asset.id`.
 9. For editing existing asset metadata, send only fields that should change to `PATCH /api/assets/:id`; do not try to replace the uploaded file through this endpoint.
 10. For deletion, confirm the target slug/id and use the relevant `DELETE` endpoint only when the user explicitly asks to delete.
 11. After success, report returned `slug`, `url`, `taskSlug`, `taskUrl`, `asset.id`, or `asset.url`.
-12. On API failure, show the returned `error` message and ask whether to revise and retry.
+12. On API failure, show the returned `error` message and ask whether to revise and retry, except for a Cloudflare 1010 signature block: do not retry it automatically and report the administrator action required.
 
 ## Content Mapping
 

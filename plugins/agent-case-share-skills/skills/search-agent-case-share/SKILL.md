@@ -13,6 +13,9 @@ Use this skill to treat Agent Case Share as a readable knowledge base.
 - Use `https://agentcaseshare.cn/` as the default base URL; ask only for a different site if the user mentions one.
 - For hidden or draft content, resolve a personal API key from the Agent Case Share user configuration file before environment variables. If it is missing, invoke `$configure-agent-case-share`; do not ask the user to paste a key into chat.
 - Treat the API key as a secret. Do not print it, commit it, log it, or include it in generated files.
+- Set `User-Agent: AgentCaseShare-AIClient/1.0` and `Accept: application/json` explicitly on every Agent Case Share HTTP request. Do not rely on the default User-Agent of Python `urllib`, curl, Node `fetch`, or any other client, and do not impersonate a browser User-Agent.
+- For JSON requests, also set `Content-Type: application/json`; retain `Authorization: Bearer <personal-api-key>` whenever the existing endpoint rules require it. For downloads, send the fixed User-Agent and Accept headers even though the response is binary.
+- If a response body contains `cloudflare_error: true`, `error_code: 1010`, or `browser_signature_banned`, do not retry automatically. Report that Cloudflare blocked the request before it reached the API, and ask the site administrator to review the Browser Integrity Check rule for `/api/*` and allow `AgentCaseShare-AIClient/1.0`.
 - Cite returned `url` values when summarizing or reusing content.
 
 ## Inputs
@@ -67,11 +70,12 @@ For endpoint parameters, response shapes, and examples, read:
    - `/projects/:slug` -> `GET /api/projects/:slug`
    - `/papers/:slug` -> `GET /api/papers/:slug`
    - `/assets/:id` -> use `GET /api/assets` with `q`/filters when no public detail endpoint is available
-4. Add `Authorization: Bearer <personal-api-key>` only for hidden or draft content.
+4. Set the required explicit `User-Agent` and `Accept` headers; add `Content-Type: application/json` for JSON requests. Add `Authorization: Bearer <personal-api-key>` only for hidden or draft content.
 5. Fetch JSON and inspect `items`, `task`, `article`, `project`, or `paper`.
 6. For summaries, preserve source links using each returned `url`.
 7. If a query is broad, start with `limit=10`; broaden only when needed.
 8. If the API returns `404`, report that the content was not found or not visible to the current credentials.
+9. On a Cloudflare 1010 signature block, do not retry; report that the request was intercepted before the API and direct the site administrator to allow the fixed AI client User-Agent for `/api/*`.
 
 ## Query Guidance
 
@@ -89,7 +93,7 @@ For endpoint parameters, response shapes, and examples, read:
 To download a public asset file (skill package, prompt template, workflow definition, etc.):
 
 1. Obtain the `downloadUrl` from search results (`/api/search`), asset list (`/api/assets`), or asset detail (`/api/assets/:id`). Format: `/api/assets/:id/download`.
-2. Make a `GET` request to that URL. No authentication required for public assets.
+2. Make a `GET` request to that URL with `User-Agent: AgentCaseShare-AIClient/1.0` and `Accept: application/json`. No authentication is required for public assets.
 3. The response streams the file binary with appropriate `Content-Type` and `Content-Disposition` headers.
 4. Save the file using the `fileName` from the asset metadata (or derive from `downloadUrl`).
 

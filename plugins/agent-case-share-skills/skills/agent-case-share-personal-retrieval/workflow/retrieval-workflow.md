@@ -45,6 +45,8 @@ The decision is automatic within the Agent's current turn. Explicit skill invoca
 
 Use `$search-agent-case-share-personal` with a focused query and `limit=decision.max_results`.
 
+Require the delegated skill to set `User-Agent: AgentCaseShare-AIClient/1.0` and `Accept: application/json` explicitly for every underlying request, use `Content-Type: application/json` for JSON requests, and retain bearer authentication without exposing the key. Do not rely on Python `urllib`, curl, Node `fetch`, or another default User-Agent, and do not impersonate a browser.
+
 ```python
 if decision.case_slugs or decision.asset_ids:
     named_items = read_named_items(
@@ -115,6 +117,7 @@ Use the assembled context to improve the answer to the current user request. The
 - Missing search skill: continue without personal context and state that retrieval was unavailable.
 - `401`: ask the user to configure or update credentials.
 - `404`: skip the missing case or asset and continue with other results.
+- Cloudflare signature block (`cloudflare_error: true`, `error_code: 1010`, or `browser_signature_banned`): do not retry. Report that Cloudflare intercepted the request before it reached the API and direct the site administrator to allow `AgentCaseShare-AIClient/1.0` in the Browser Integrity Check rule for `/api/*`.
 - Network or download error: continue with available context; do not fabricate personal material.
 - No relevant results: continue normally and do not claim personal material was used.
 

@@ -4,7 +4,7 @@
 
 Ask the user to sign in to Agent Case Share, open `/profile`, and generate a personal API key.
 
-Use it as a bearer token:
+Use it as a bearer token for authenticated JSON requests:
 
 ```http
 Authorization: Bearer acsp_live_<secret>
@@ -12,6 +12,31 @@ Content-Type: application/json
 ```
 
 Do not ask for the user's password. Do not store the API key in logs, committed files, screenshots, shared prompts, or generated artifacts.
+
+### Required request headers
+
+Set these headers explicitly for every Agent Case Share request. Do not rely on Python `urllib`, curl, Node `fetch`, or another HTTP client's default User-Agent, and do not use a browser-like User-Agent.
+
+JSON request:
+
+```http
+POST /api/tasks
+User-Agent: AgentCaseShare-AIClient/1.0
+Accept: application/json
+Authorization: Bearer <personal-api-key>
+Content-Type: application/json
+```
+
+Multipart upload request:
+
+```http
+POST /api/assets/user
+User-Agent: AgentCaseShare-AIClient/1.0
+Accept: application/json
+Authorization: Bearer <personal-api-key>
+```
+
+For `POST /api/content-images`, `POST /api/assets`, and `POST /api/assets/user`, do not manually set `Content-Type: multipart/form-data` or its boundary. Let curl `-F`, `fetch` `FormData`, or the HTTP client generate it.
 
 ## Slug and URL Encoding
 
@@ -25,7 +50,6 @@ Endpoint:
 
 ```http
 POST /api/content-images
-Content-Type: multipart/form-data
 ```
 
 Use this before `POST /api/tasks` or `POST /api/articles` when Markdown content references local image files.
@@ -68,7 +92,6 @@ Endpoint:
 
 ```http
 POST /api/assets
-Content-Type: multipart/form-data
 ```
 
 Use this before `POST /api/tasks` when a case should include reusable assets such as skills, prompts, workflows, templates, or MCP configs. Without `publishAsset=true`, this endpoint uploads the file and returns metadata that can be placed in a task `reusableAssets` array.
@@ -118,7 +141,6 @@ Endpoint:
 
 ```http
 POST /api/assets/user
-Content-Type: multipart/form-data
 ```
 
 Use this when the user wants to add an asset to their personal asset library independent of a case. This is the preferred endpoint for normal users and AI agents.
@@ -161,7 +183,6 @@ Endpoint:
 
 ```http
 POST /api/assets
-Content-Type: multipart/form-data
 ```
 
 `POST /api/assets` can also create a standalone user asset when `publishAsset=true` is included. Prefer `POST /api/assets/user` for ordinary user uploads, but use this compatibility path if a client only knows `/api/assets`.
@@ -477,6 +498,7 @@ Successful response:
 - `401`: API key is missing, invalid, revoked, or the endpoint requires a signed-in session
 - `403`: authenticated user cannot edit or delete the requested task, article, or asset
 - `404`: task, article, asset, or slug does not exist, or is not editable by the current user
+- Cloudflare signature block: if the body contains `cloudflare_error: true`, `error_code: 1010`, or `browser_signature_banned`, do not retry automatically. Report that Cloudflare intercepted the request before it reached the API. Ask the site administrator to check the Browser Integrity Check rule for `/api/*` and allow `AgentCaseShare-AIClient/1.0`.
 
 On failure:
 

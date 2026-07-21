@@ -10,6 +10,31 @@ Authorization: Bearer acsp_live_<secret>
 
 Use a bearer token for external scripts and AI agents. Never store or print real keys.
 
+### Required request headers
+
+Set these headers explicitly for every Agent Case Share request. Do not rely on Python `urllib`, curl, Node `fetch`, or another HTTP client's default User-Agent, and do not use a browser-like User-Agent.
+
+JSON request:
+
+```http
+GET /api/me/search?q=agent&limit=10
+User-Agent: AgentCaseShare-AIClient/1.0
+Accept: application/json
+Authorization: Bearer <personal-api-key>
+Content-Type: application/json
+```
+
+Multipart upload request (where applicable):
+
+```http
+POST /api/assets/user
+User-Agent: AgentCaseShare-AIClient/1.0
+Accept: application/json
+Authorization: Bearer <personal-api-key>
+```
+
+Do not manually set `Content-Type: multipart/form-data` or its boundary. Let curl `-F`, `fetch` `FormData`, or the HTTP client generate it.
+
 ## Slug and URL Encoding
 
 New cases use opaque `case-xxxxxxxx` slugs, and their articles use `article-xxxxxxxx`; each suffix has 8 lowercase letters or digits. Use returned `url` values directly because they are already percent-encoded. When building `/api/me/cases/:slug` from a raw `slug` field, encode the path segment exactly once with `encodeURIComponent`. Decode an already encoded task URL segment once before rebuilding a different path. Do not infer a slug from its title.
@@ -250,6 +275,7 @@ Returns one authenticated-user-owned reusable asset.
 - `400`: invalid query parameter such as `type` or `status`
 - `401`: missing, invalid, or revoked personal API key, or no signed-in session
 - `404`: the case or asset does not exist in the authenticated user's library
+- Cloudflare signature block: if the body contains `cloudflare_error: true`, `error_code: 1010`, or `browser_signature_banned`, do not retry automatically. Report that Cloudflare intercepted the request before it reached the API. Ask the site administrator to check the Browser Integrity Check rule for `/api/*` and allow `AgentCaseShare-AIClient/1.0`.
 
 On failure, show the returned `error` string and ask whether to retry with different filters or credentials.
 
@@ -257,7 +283,9 @@ On failure, show the returned `error` string and ask whether to retry with diffe
 
 ```http
 GET /api/assets/:id/download
-Authorization: Bearer acsp_live_<secret>
+User-Agent: AgentCaseShare-AIClient/1.0
+Accept: application/json
+Authorization: Bearer <personal-api-key>
 ```
 
 Downloads the actual file content for a reusable asset. Works for both personal (HIDDEN/DRAFT) and public assets the user has access to.

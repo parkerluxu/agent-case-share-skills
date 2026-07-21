@@ -72,6 +72,31 @@ Authorization: Bearer <personal-api-key>
 ```
 Personal API key obtained from `/profile` page.
 
+### Required request headers
+
+The delegated `search-agent-case-share-personal` skill must set these headers explicitly on every underlying request. Do not rely on Python `urllib`, curl, Node `fetch`, or another HTTP client's default User-Agent, and do not use a browser-like User-Agent.
+
+JSON request:
+
+```http
+GET /api/me/search?q=keyword&limit=5
+User-Agent: AgentCaseShare-AIClient/1.0
+Accept: application/json
+Authorization: Bearer <personal-api-key>
+Content-Type: application/json
+```
+
+Multipart upload request (where applicable):
+
+```http
+POST /api/assets/user
+User-Agent: AgentCaseShare-AIClient/1.0
+Accept: application/json
+Authorization: Bearer <personal-api-key>
+```
+
+Do not manually set `Content-Type: multipart/form-data` or its boundary. Let curl `-F`, `fetch` `FormData`, or the HTTP client generate it.
+
 ### Endpoints
 
 | Method | Endpoint | Purpose |
@@ -98,6 +123,8 @@ Personal API key obtained from `/profile` page.
 // 500 - Server Error
 {"error": "internal_error", "message": "Server error"}
 ```
+
+If the response body contains `cloudflare_error: true`, `error_code: 1010`, or `browser_signature_banned`, do not retry automatically. Report that Cloudflare intercepted the request before it reached the API, and ask the site administrator to check the Browser Integrity Check rule for `/api/*` and allow `AgentCaseShare-AIClient/1.0`.
 
 ## Environment Variables
 
