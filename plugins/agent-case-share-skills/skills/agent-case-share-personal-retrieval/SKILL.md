@@ -30,6 +30,7 @@ An isolated topic, generic word such as `案例` or `asset`, or an isolated case
 ## Safety
 
 - Search only the authenticated user's personal library through `/api/me/*` endpoints.
+- When Agent Case Share MCP is connected, prefer its personal read tools through `$search-agent-case-share-personal`; use the JSON API fallback when MCP is unavailable or cannot download the needed file.
 - Require a signed-in browser session or personal API key for personal API requests.
 - Resolve credentials through `$configure-agent-case-share` when none is available; never ask the user to paste a key into chat.
 - Require `$search-agent-case-share-personal` to use `User-Agent: AgentCaseShare-AIClient/1.0` and `Accept: application/json` explicitly for all underlying requests, plus `Content-Type: application/json` for JSON requests and the existing bearer authentication. Do not rely on Python `urllib`, curl, Node `fetch`, or other default User-Agents, and do not impersonate a browser.
@@ -42,7 +43,7 @@ An isolated topic, generic word such as `案例` or `asset`, or an isolated case
 
 1. Decide whether the current task benefits from personal retrieval.
 2. Extract the task domain, technical terms, intent, optional case slugs, and asset IDs.
-3. Call `$search-agent-case-share-personal` with a focused query and `limit=5` by default.
+3. Call `$search-agent-case-share-personal` with a focused query and `limit=5` by default. That Skill selects MCP first and falls back to the saved-credential JSON API.
 4. Treat `/api/me/search` as a lightweight search response. Do not read `problem`, `solution`, `workflow`, `impact`, or `reusableAssets` from a case search item.
 5. For relevant case results, fetch `/api/me/cases/:slug` to obtain the full case context.
 6. For relevant asset results, fetch `/api/me/assets/:id`; download the asset file through its `downloadUrl` when the asset content is needed for the current task.

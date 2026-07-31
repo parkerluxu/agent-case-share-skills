@@ -37,6 +37,8 @@ Use this skill to configure the current user's local Agent Case Share credential
 
 ## Credential Resolution
 
+The local stdio Agent Case Share MCP server reads the same configuration file written by this skill. After setup, do not copy the personal API key into an MCP client JSON file or pass it as a tool argument. Remote HTTP MCP uses its server-side credentials and is not a per-user OAuth connection.
+
 Other Agent Case Share skills resolve settings in this order:
 
 1. The user configuration file written by this skill.

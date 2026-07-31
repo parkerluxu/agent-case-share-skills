@@ -10,6 +10,7 @@ Use this skill to treat Agent Case Share as a readable knowledge base.
 ## Safety
 
 - Prefer public read APIs; no API key is needed for published content.
+- If an Agent Case Share MCP server is connected, use its read tools first. Use the JSON API only when MCP is unavailable or does not provide the required result or file capability.
 - Use `https://agentcaseshare.cn/` as the default base URL; ask only for a different site if the user mentions one.
 - For hidden or draft content, resolve a personal API key from the Agent Case Share user configuration file before environment variables. If it is missing, invoke `$configure-agent-case-share`; do not ask the user to paste a key into chat.
 - Treat the API key as a secret. Do not print it, commit it, log it, or include it in generated files.
@@ -25,6 +26,7 @@ Confirm:
 - Base URL, default `https://agentcaseshare.cn/`
 - What to find or read: categories, tags, cases, articles, news, projects, papers, assets, a specific slug/id, or a URL
 - Optional personal API key for private content
+- Connected Agent Case Share MCP tools, when available. Never pass a personal API key as an MCP tool argument.
 
 User configuration takes precedence and is created by `$configure-agent-case-share`:
 
@@ -53,8 +55,14 @@ For endpoint parameters, response shapes, and examples, read:
 
 ## Workflow
 
-1. Resolve settings from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`. For private requests, also resolve `AGENT_CASE_SHARE_API_KEY`; if no key is available, invoke `$configure-agent-case-share`.
-2. Classify the request:
+1. Inspect the connected tools. Prefer these MCP mappings when available:
+   - `search_content` for general search
+   - `list_cases` and `get_case` for cases
+   - `get_article` for article Markdown
+   - `get_project` and `get_paper` for catalog details
+   - `list_categories`, `list_tags`, `list_assets`, `get_asset`, and `get_asset_download_url` for discovery and assets
+2. Resolve settings from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`. For private requests, also resolve `AGENT_CASE_SHARE_API_KEY`; if no key is available, invoke `$configure-agent-case-share`.
+3. If MCP is unavailable or a required tool is missing, classify the request:
    - Category discovery -> `GET /api/categories`
    - Tag discovery -> `GET /api/tags`
    - General search -> `GET /api/search`
@@ -64,18 +72,20 @@ For endpoint parameters, response shapes, and examples, read:
    - Project detail -> `GET /api/projects/:slug`
    - Paper detail -> `GET /api/papers/:slug`
    - Public asset list/filtering -> `GET /api/assets`
-3. If the user provides a site URL, infer the slug and endpoint, preserving the path segment's single percent-encoding:
+4. If the user provides a site URL, infer the slug and endpoint, preserving the path segment's single percent-encoding:
    - `/tasks/:slug` -> `GET /api/tasks/:slug`
    - `/articles/:slug` -> `GET /api/articles/:slug`
    - `/projects/:slug` -> `GET /api/projects/:slug`
    - `/papers/:slug` -> `GET /api/papers/:slug`
    - `/assets/:id` -> use `GET /api/assets` with `q`/filters when no public detail endpoint is available
-4. Set the required explicit `User-Agent` and `Accept` headers; add `Content-Type: application/json` for JSON requests. Add `Authorization: Bearer <personal-api-key>` only for hidden or draft content.
-5. Fetch JSON and inspect `items`, `task`, `article`, `project`, or `paper`.
-6. For summaries, preserve source links using each returned `url`.
-7. If a query is broad, start with `limit=10`; broaden only when needed.
-8. If the API returns `404`, report that the content was not found or not visible to the current credentials.
-9. On a Cloudflare 1010 signature block, do not retry; report that the request was intercepted before the API and direct the site administrator to allow the fixed AI client User-Agent for `/api/*`.
+5. For API fallback, set the required explicit `User-Agent` and `Accept` headers; add `Content-Type: application/json` for JSON requests. Add `Authorization: Bearer <personal-api-key>` only for hidden or draft content.
+6. Fetch JSON and inspect `items`, `task`, `article`, `project`, or `paper`.
+7. For summaries, preserve source links using each returned `url`.
+8. If a query is broad, start with `limit=10`; broaden only when needed.
+9. If the API returns `404`, report that the content was not found or not visible to the current credentials.
+10. On a Cloudflare 1010 signature block, do not retry; report that the request was intercepted before the API and direct the site administrator to allow the fixed AI client User-Agent for `/api/*`.
+
+MCP read tools return a resolved download or source URL for assets. If the client needs the actual binary file and cannot fetch that URL, use the API download workflow with the saved credential.
 
 ## Query Guidance
 

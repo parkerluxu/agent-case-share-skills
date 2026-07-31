@@ -10,6 +10,7 @@ Use this skill to publish content to the Agent Case Share platform.
 ## Safety
 
 - Never ask for the user's password.
+- If an Agent Case Share MCP server is connected, use its write tools first for supported operations. Use the JSON API when MCP is unavailable, when the required tool is not exposed, or when the client cannot provide/read a file as Base64.
 - Use `https://agentcaseshare.cn/` as the default base URL; ask only for a different site if the user mentions one.
 - Resolve credentials from the user configuration file before using environment variables. If a required key is missing, invoke `$configure-agent-case-share`; do not ask the user to paste a key into chat.
 - Treat the API key as a secret. Do not print it, commit it, log it, or include it in generated files.
@@ -45,7 +46,13 @@ For endpoint fields, payload examples, responses, and error handling, read:
 
 ## Workflow
 
-1. Classify the request:
+1. Inspect connected Agent Case Share MCP tools and prefer these mappings:
+   - `create_case` or `update_case` for cases
+   - `create_article` or `update_article` for articles
+   - `upload_content_image` for Markdown images
+   - `upload_asset`, `upload_user_asset`, or `update_asset` for reusable assets
+   - Use the API fallback for deletion because the current MCP server does not expose delete tools.
+2. Classify the request when MCP is unavailable or does not expose the required operation:
    - Markdown content image upload -> `POST /api/content-images`
    - Case-attached reusable asset draft -> `POST /api/assets`
    - Standalone user asset upload -> `POST /api/assets/user`
@@ -57,17 +64,19 @@ For endpoint fields, payload examples, responses, and error handling, read:
    - Article/tutorial publishing -> `POST /api/articles`
    - Article/tutorial editing -> `PATCH /api/articles/:slug`
    - Article/tutorial deletion -> `DELETE /api/articles/:slug`
-2. If Markdown contains local image paths, upload each image first and replace local paths with returned URLs.
-3. Normalize content into the required payload.
-4. Resolve credentials from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_API_KEY` and `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`.
-5. Use `Authorization: Bearer <personal-api-key>` together with the fixed explicit `User-Agent` and `Accept` headers. Set `Content-Type: application/json` for JSON bodies; allow the HTTP client to set multipart boundaries for uploads.
-6. Use hidden/draft defaults unless the user requested public publishing.
-7. For assets that should appear on a case, upload files to `POST /api/assets` first and place returned draft `asset` objects into `reusableAssets` when creating or updating the task.
-8. For assets that should exist in the user's asset library independent of a case, upload files to `POST /api/assets/user` and report the returned `asset.id`.
-9. For editing existing asset metadata, send only fields that should change to `PATCH /api/assets/:id`; do not try to replace the uploaded file through this endpoint.
-10. For deletion, confirm the target slug/id and use the relevant `DELETE` endpoint only when the user explicitly asks to delete.
-11. After success, report returned `slug`, `url`, `taskSlug`, `taskUrl`, `asset.id`, or `asset.url`.
-12. On API failure, show the returned `error` message and ask whether to revise and retry, except for a Cloudflare 1010 signature block: do not retry it automatically and report the administrator action required.
+3. If Markdown contains local image paths, upload each image first and replace local paths with returned URLs.
+4. Normalize content into the required payload.
+5. Resolve credentials from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_API_KEY` and `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`. Never pass a personal API key as an MCP tool argument. Invoke `$configure-agent-case-share` when the saved credential is missing.
+6. For API fallback, use `Authorization: Bearer <personal-api-key>` together with the fixed explicit `User-Agent` and `Accept` headers. Set `Content-Type: application/json` for JSON bodies; allow the HTTP client to set multipart boundaries for uploads.
+7. Use hidden/draft defaults unless the user requested public publishing.
+8. For assets that should appear on a case, upload files to `POST /api/assets` first and place returned draft `asset` objects into `reusableAssets` when creating or updating the task.
+9. For assets that should exist in the user's asset library independent of a case, upload files to `POST /api/assets/user` and report the returned `asset.id`.
+10. For editing existing asset metadata, send only fields that should change to `PATCH /api/assets/:id`; do not try to replace the uploaded file through this endpoint.
+11. For deletion, confirm the target slug/id and use the relevant `DELETE` endpoint only when the user explicitly asks to delete.
+12. After success, report returned `slug`, `url`, `taskSlug`, `taskUrl`, `asset.id`, or `asset.url`.
+13. On API failure, show the returned `error` message and ask whether to revise and retry, except for a Cloudflare 1010 signature block: do not retry it automatically and report the administrator action required.
+
+MCP upload tools require the client to provide file contents as Base64. If the current client cannot read a local file or fetch the returned download URL, continue with the API workflow or report the missing file capability instead of inventing an upload result.
 
 ## Content Mapping
 

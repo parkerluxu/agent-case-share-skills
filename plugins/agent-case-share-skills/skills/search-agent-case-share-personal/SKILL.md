@@ -10,6 +10,7 @@ Use this skill to query the current user's private Agent Case Share library.
 ## Safety
 
 - Require a signed-in browser session or `Authorization: Bearer <personal-api-key>` for every `/api/me/*` request.
+- If an Agent Case Share MCP server is connected, use `search_my_content`, `list_my_cases`, `get_my_case`, `list_my_assets`, and `get_my_asset` first. Fall back to `/api/me/*` when MCP is unavailable or lacks the needed file capability.
 - If no browser session is available, resolve the personal API key from the Agent Case Share user configuration file before environment variables. If it is still missing, invoke `$configure-agent-case-share`; do not ask the user to paste a key into chat.
 - Treat the API key as a secret. Do not print it, commit it, log it, or include it in generated files.
 - Set `User-Agent: AgentCaseShare-AIClient/1.0` and `Accept: application/json` explicitly on every Agent Case Share HTTP request. Do not rely on the default User-Agent of Python `urllib`, curl, Node `fetch`, or any other client, and do not impersonate a browser User-Agent.
@@ -24,6 +25,7 @@ Confirm:
 
 - Base URL, default `https://agentcaseshare.cn/`
 - Personal API key generated from `/profile`, unless a signed-in browser session is available
+- Connected Agent Case Share MCP tools, when available. Never pass a personal API key as an MCP tool argument.
 - Whether the user wants personal cases, personal assets, one case/asset detail, or mixed personal search
 
 User configuration takes precedence and is created by `$configure-agent-case-share`:
@@ -52,26 +54,31 @@ For endpoint parameters, response shapes, and examples, read:
 
 ## Workflow
 
-1. Resolve credentials from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_API_KEY` and `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`. If no key is available, invoke `$configure-agent-case-share` before making an authenticated request.
-2. Use `Authorization: Bearer <personal-api-key>` without printing the key, plus the required explicit `User-Agent` and `Accept` headers. Add `Content-Type: application/json` for JSON requests.
-3. Classify the request:
+1. Inspect connected MCP tools first:
+   - `search_my_content` for mixed personal search
+   - `list_my_cases` and `get_my_case` for personal cases
+   - `list_my_assets` and `get_my_asset` for personal assets
+   - `get_asset_download_url` for an asset download URL
+2. Resolve credentials from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_API_KEY` and `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`. If no key is available, invoke `$configure-agent-case-share` before making an authenticated request.
+3. For API fallback, use `Authorization: Bearer <personal-api-key>` without printing the key, plus the required explicit `User-Agent` and `Accept` headers. Add `Content-Type: application/json` for JSON requests.
+4. Classify the request when MCP is unavailable or lacks the required operation:
    - Search personal cases and assets together -> `GET /api/me/search`
    - List/filter personal cases -> `GET /api/me/cases`
    - Read one personal case -> `GET /api/me/cases/:slug`
    - List/filter personal assets -> `GET /api/me/assets`
    - Read one personal asset -> `GET /api/me/assets/:id`
    - **Download an asset file -> `GET /api/assets/:id/download`**
-4. If the user provides a URL, infer while preserving a single percent-encoding of the path segment:
+5. If the user provides a URL, infer while preserving a single percent-encoding of the path segment:
    - `/tasks/:slug` -> `GET /api/me/cases/:slug`
    - `/assets/:id` -> `GET /api/me/assets/:id`
-5. Fetch JSON and inspect `items`, `case`, or `asset`.
-6. Preserve returned `url` and `downloadUrl` values when reporting results.
-7. If the user wants to download the asset file, use the `downloadUrl` from search/detail results (format: `/api/assets/:id/download`) with `GET` to stream the file content.
-8. If the user wants to edit the asset after finding it, hand off the returned asset `id` to `$publish-agent-case-share`, which owns `PATCH /api/assets/:id`.
-9. If a query is broad, start with `limit=10`; use pagination only when needed.
-10. On `401`, tell the user that credentials need updating and invoke `$configure-agent-case-share` or use a signed-in session.
-11. On `404`, report that the item was not found in the authenticated user's library.
-12. On a Cloudflare 1010 signature block, do not retry; report that the request was intercepted before the API and direct the site administrator to allow the fixed AI client User-Agent for `/api/*`.
+6. Fetch JSON and inspect `items`, `case`, or `asset`.
+7. Preserve returned `url` and `downloadUrl` values when reporting results.
+8. If the user wants to download the asset file, use the MCP download URL tool when it provides a usable URL; otherwise use the `downloadUrl` from search/detail results (format: `/api/assets/:id/download`) with `GET` to stream the file content.
+9. If the user wants to edit the asset after finding it, hand off the returned asset `id` to `$publish-agent-case-share`, which owns `PATCH /api/assets/:id`.
+10. If a query is broad, start with `limit=10`; use pagination only when needed.
+11. On `401`, tell the user that credentials need updating and invoke `$configure-agent-case-share` or use a signed-in session.
+12. On `404`, report that the item was not found in the authenticated user's library.
+13. On a Cloudflare 1010 signature block, do not retry; report that the request was intercepted before the API and direct the site administrator to allow the fixed AI client User-Agent for `/api/*`.
 
 ## Query Guidance
 

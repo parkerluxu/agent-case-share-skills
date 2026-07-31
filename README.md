@@ -80,6 +80,26 @@ It hides the key while typing. Verify the setup without exposing credentials:
 node plugins/agent-case-share-skills/skills/configure-agent-case-share/scripts/configure.mjs --status
 ```
 
+## MCP Setup
+
+Skill configuration and MCP registration are separate steps. After running `configure-agent-case-share`, a local stdio MCP server can reuse the same saved credential without putting the API Key in client configuration:
+
+```json
+{
+  "mcpServers": {
+    "agent-case-share": {
+      "command": "npm",
+      "args": ["run", "mcp"],
+      "cwd": "/path/to/agent-case-share"
+    }
+  }
+}
+```
+
+Register this block separately in Claude Desktop, Cursor, or a custom agent that supports MCP. The MCP server is part of the Agent Case Share web repository, but it runs as a separate process. Production deployments expose the Streamable HTTP endpoint at `https://mcp.agentcaseshare.cn/mcp`; the remote server uses server-level authentication and should not be treated as a per-user credential connection.
+
+When Agent Case Share MCP tools are available, the Skills use them first. If the client has no MCP connection, the required tool is not exposed, or a binary file cannot be passed or downloaded, the Skills fall back to the JSON API using the saved configuration. Never paste a personal API Key into chat or pass it as an MCP tool argument.
+
 ## CLI and CI Compatibility
 
 Desktop configuration takes precedence. Environment variables remain supported for CLI, CI, and Gemini extension settings:
