@@ -6,7 +6,7 @@
   "plugins": [
     {
       "name": "agent-case-share-skills",
-      "description": "Search, retrieve, publish, and edit Agent Case Share content through MCP.",
+      "description": "Search, retrieve, publish, and edit Agent Case Share content and case attachments through MCP.",
       "source": "./plugins/agent-case-share-skills"
     }
   ]

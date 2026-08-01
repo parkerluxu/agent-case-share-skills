@@ -1,7 +1,7 @@
 interface:
   display_name: "Agent Case Share"
-  short_description: "Publish Agent Case Share content through MCP."
-  default_prompt: "Use $publish-agent-case-share to draft and publish an Agent Case Share case through MCP."
+  short_description: "Publish content and case attachments through MCP."
+  default_prompt: "Use $publish-agent-case-share to publish a case or manage its attachments through MCP."
 dependencies:
   tools:
     - type: "mcp"

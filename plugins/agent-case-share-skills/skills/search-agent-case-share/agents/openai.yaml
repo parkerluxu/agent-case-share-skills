@@ -1,7 +1,7 @@
 interface:
   display_name: "Search Agent Case Share"
-  short_description: "Search Agent Case Share content through MCP."
-  default_prompt: "Use $search-agent-case-share to find relevant Agent Case Share content through MCP."
+  short_description: "Search content and case attachments through MCP."
+  default_prompt: "Use $search-agent-case-share to find relevant content or case attachments through MCP."
 dependencies:
   tools:
     - type: "mcp"

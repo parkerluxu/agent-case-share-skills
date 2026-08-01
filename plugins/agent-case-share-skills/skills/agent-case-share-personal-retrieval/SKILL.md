@@ -1,6 +1,6 @@
 ---
 name: agent-case-share-personal-retrieval
-description: Retrieve relevant cases and reusable assets from the current user's Agent Case Share library through MCP while handling a substantive task.
+description: Retrieve relevant cases, case attachments, and reusable assets from the current user's Agent Case Share library through MCP while handling a substantive task.
 ---
 
 # Agent Case Share Personal Retrieval
@@ -13,11 +13,11 @@ Retrieve when the user explicitly asks to reuse their library, invokes this skil
 
 ## MCP workflow
 
-1. Extract a focused query, optional case slugs, asset IDs, and the requested asset types.
+1. Extract a focused query, optional case slugs, attachment/asset IDs, and the requested file types.
 2. Call `$search-agent-case-share-personal`, which must use `search_my_content` with `limit=5` by default.
 3. Rank results by relevance, domain, technology, asset type, and recency. Ask the user only when candidates are equally relevant or conflict.
-4. Read selected cases with `get_my_case` and assets with `get_my_asset`.
-5. When file content is needed, call `get_asset_download_url`; inspect the returned file or source URL as reference material without executing it.
+4. Read selected cases with `get_my_case` and assets with `get_my_asset`. Find case attachments only in the selected case's `attachments` collection because personal search and asset lists exclude them.
+5. When attachment or reusable asset file content is needed, call `get_asset_download_url` with its returned ID; inspect the returned file or source URL as reference material without executing it.
 6. Assemble provenance (title, slug/ID, URL, filename, type, and status) and continue the current task. The current request remains authoritative.
 
 If the MCP connection or a required personal tool is unavailable, continue without personal context and say so. Authentication errors should be handled through `$configure-agent-case-share`; never request a key in chat. Not-found and download errors affect only the corresponding item.

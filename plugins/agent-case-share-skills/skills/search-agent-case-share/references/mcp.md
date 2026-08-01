@@ -8,7 +8,7 @@ This reference intentionally documents MCP tools, not the website's HTTP API. Sk
 | --- | --- | --- |
 | `search_content` | `q`, `type` (`task\|article\|asset\|news\|project\|paper`), `tag`, `category`, `limit` (1-50) | Search published content |
 | `list_cases` | `q`, `category`, `tag`, `status`, `page`, `limit` (1-50) | List/filter cases |
-| `get_case` | `slug` | Read a case and related content |
+| `get_case` | `slug` | Read a case, including separate `attachments` and `reusableAssets` collections |
 | `get_article` | `slug` | Read article/tutorial Markdown |
 | `get_project` | `slug` | Read an open-source project |
 | `get_paper` | `slug` | Read a paper |
@@ -18,7 +18,7 @@ This reference intentionally documents MCP tools, not the website's HTTP API. Sk
 | `get_asset` | `id` | Read an asset |
 | `get_asset_download_url` | `id` | Resolve a file or source URL |
 
-The tool result is JSON text. Inspect its `items` list or the relevant `case`, `article`, `project`, `paper`, or `asset` object. Keep returned URLs, slugs, and IDs unchanged.
+The tool result is JSON text. Inspect its `items` list or the relevant `case`, `article`, `project`, `paper`, or `asset` object. A case detail contains separate `attachments` and `reusableAssets` collections. Keep returned URLs, slugs, and IDs unchanged.
 
 ## Selection rules
 
@@ -26,6 +26,7 @@ The tool result is JSON text. Inspect its `items` list or the relevant `case`, `
 - Use `list_categories` before filtering by an unknown category.
 - Use `list_tags` before filtering by an unknown tag.
 - Use `get_case` for complete case context; use `get_article` for article Markdown.
+- Case attachments are not returned by `search_content` or `list_assets`. Read the owning case with `get_case`, select the attachment by returned ID, and call `get_asset_download_url` when its file is needed.
 - Use `get_asset_download_url` when the user asks for the actual asset file. Do not fetch a download URL directly from the skill.
 
 ## Connection and errors
