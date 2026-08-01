@@ -1,6 +1,6 @@
 # Agent Case Share
 
-Use `plugins/agent-case-share-skills/skills/configure-agent-case-share` when the user asks to configure, connect, update, verify, or clear Agent Case Share credentials. Do not ask users to paste API keys into chat.
+Use `plugins/agent-case-share-skills/skills/configure-agent-case-share` when the user asks to configure, connect, update, verify, or clear Agent Case Share MCP credentials. Do not ask users to paste keys into chat.
 
 Use `plugins/agent-case-share-skills/skills/publish-agent-case-share` when the user asks to publish or edit Agent Case Share tasks, cases, articles, tutorials, Markdown images, or reusable assets.
 

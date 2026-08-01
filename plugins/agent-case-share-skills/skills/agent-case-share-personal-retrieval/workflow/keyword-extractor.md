@@ -112,7 +112,7 @@ ASSET_TYPE_KEYWORDS = {
 
 If matches found → return matched types. If none → default `["CASE", "SKILL", "PROMPT", "WORKFLOW"]`.
 
-### 5. Flat Keyword List (for search API `q` parameter)
+### 5. Flat Keyword List (for the MCP `search_my_content` `q` parameter)
 
 Build combined keyword list:
 1. Domain keywords (top 3)

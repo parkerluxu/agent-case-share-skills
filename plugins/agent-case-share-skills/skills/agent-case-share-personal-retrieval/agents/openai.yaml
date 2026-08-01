@@ -1,4 +1,9 @@
 interface:
   display_name: "Agent Case Share Personal Retrieval"
-  short_description: "Proactively retrieve relevant personal cases/assets for the current task."
-  default_prompt: "Use $agent-case-share-personal-retrieval when the current task would benefit from the user's prior cases or assets; explicit invocation or a direct reuse request should always trigger retrieval."
+  short_description: "Retrieve personal Agent Case Share context through MCP."
+  default_prompt: "Use $agent-case-share-personal-retrieval to reuse relevant personal cases or assets through MCP."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "agent-case-share"
+      description: "Agent Case Share MCP server"

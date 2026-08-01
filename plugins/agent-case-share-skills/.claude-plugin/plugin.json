@@ -1,7 +1,7 @@
 {
   "name": "agent-case-share-skills",
-  "description": "Search, retrieve, publish, and edit Agent Case Share content and reusable assets.",
-  "version": "0.5.5",
+  "description": "Search, retrieve, publish, and edit Agent Case Share content and reusable assets through MCP.",
+  "version": "0.6.0",
   "author": {
     "name": "parkerluxu"
   },

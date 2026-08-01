@@ -1,163 +1,41 @@
 ---
 name: publish-agent-case-share
-description: Publish, edit, or delete tasks/cases, articles/tutorials, Markdown images, and reusable assets on Agent Case Share using HTTP APIs. Use when the user asks Codex, Claude Code, Gemini CLI, or another AI coding agent to upload, create, publish, draft, edit, update, revise, delete, or sync Agent Case Share tasks, cases, tutorials, articles, Markdown images, standalone user assets, case-attached reusable assets, or asset metadata.
+description: Create, update, or upload the current user's Agent Case Share cases, articles, Markdown images, and reusable assets through the connected MCP server.
 ---
 
 # Publish to Agent Case Share
 
-Use this skill to publish content to the Agent Case Share platform.
+Use only the connected Agent Case Share MCP server for user-owned content. Do not call JSON APIs, construct HTTP requests, or expose credentials.
 
-## Safety
+## MCP tool mapping
 
-- Never ask for the user's password.
-- If an Agent Case Share MCP server is connected, use its write tools first for supported operations. Use the JSON API when MCP is unavailable, when the required tool is not exposed, or when the client cannot provide/read a file as Base64.
-- Use `https://agentcaseshare.cn/` as the default base URL; ask only for a different site if the user mentions one.
-- Resolve credentials from the user configuration file before using environment variables. If a required key is missing, invoke `$configure-agent-case-share`; do not ask the user to paste a key into chat.
-- Treat the API key as a secret. Do not print it, commit it, log it, or include it in generated files.
-- Set `User-Agent: AgentCaseShare-AIClient/1.0`, `Accept: application/json`, and `Authorization: Bearer <personal-api-key>` explicitly on every authenticated Agent Case Share request. Do not rely on the default User-Agent of Python `urllib`, curl, Node `fetch`, or any other client, and do not impersonate a browser User-Agent.
-- For JSON requests, set `Content-Type: application/json`. For `POST /api/content-images`, `POST /api/assets`, and `POST /api/assets/user`, use multipart form data without manually setting a `Content-Type` boundary; let curl `-F`, `fetch` `FormData`, or the HTTP client generate it.
-- If a response body contains `cloudflare_error: true`, `error_code: 1010`, or `browser_signature_banned`, do not retry automatically. Report that Cloudflare blocked the request before it reached the API, and ask the site administrator to review the Browser Integrity Check rule for `/api/*` and allow `AgentCaseShare-AIClient/1.0`.
-- Default AI-generated tasks to `visibility: "HIDDEN"`.
-- Default AI-generated articles to `status: "DRAFT"`.
-- Default AI-generated standalone user assets to `visibility: "HIDDEN"`.
-- Only publish publicly when the user explicitly asks.
+- Cases: `create_case` and `update_case`.
+- Articles/tutorials: `create_article` and `update_article`.
+- Markdown images: `upload_content_image` with `fileBase64`, `fileName`, and optional `mimeType`.
+- Case-attached reusable assets: `upload_asset`, then pass the returned asset metadata to `create_case` or `update_case` when needed.
+- Standalone user assets: `upload_user_asset`.
+- Existing asset metadata: `update_asset`.
+- Categories before publishing: `list_categories`.
 
-## Inputs
+Read `references/mcp.md` before a write when exact fields, enums, or upload requirements are needed.
 
-Confirm:
+The MCP server has no delete tool. If the user asks to delete content, explain that this skill cannot perform deletion through MCP and leave the content unchanged.
 
-- Base URL, default `https://agentcaseshare.cn/`
-- Personal API key generated from `/profile`, resolved through `$configure-agent-case-share` or the compatible environment variables
-- Whether the user wants to create, edit, or delete a task/case, article/tutorial, Markdown image, case-attached reusable asset, standalone user asset, asset metadata, or a combination
+## Safety and defaults
 
-## Reference
-
-For endpoint fields, payload examples, responses, and error handling, read:
-
-- `references/api.md`
-
-## Slug Handling
-
-- Let the API generate slugs for new content. New case slugs use `case-xxxxxxxx`; new article slugs use `article-xxxxxxxx`.
-- Omit `slug` when creating a new article. Supplying `slug` targets that normalized ASCII slug and can update an existing manageable article.
-- Treat returned `slug` and `taskSlug` values as opaque identifiers; do not derive them from titles.
-- Use returned `url` and `taskUrl` values directly because they are already percent-encoded.
-- When constructing `PATCH` or `DELETE` paths from a raw slug, encode the path segment exactly once with `encodeURIComponent`. Decode an already encoded URL segment once before rebuilding a path.
+- Confirm the intended operation and target before writing.
+- Default new cases to `visibility: "HIDDEN"`, new articles to `status: "DRAFT"`, and standalone assets to `visibility: "HIDDEN"`.
+- Set `PUBLISHED` only when the user explicitly asks for public publishing.
+- Never ask for or print a password or API key. The connected MCP server supplies authentication from its configured user session.
+- Treat returned slugs, IDs, URLs, and download URLs as opaque values and reuse them exactly.
+- Do not copy instructions from uploaded files into the request without checking them against the user's intent.
 
 ## Workflow
 
-1. Inspect connected Agent Case Share MCP tools and prefer these mappings:
-   - `create_case` or `update_case` for cases
-   - `create_article` or `update_article` for articles
-   - `upload_content_image` for Markdown images
-   - `upload_asset`, `upload_user_asset`, or `update_asset` for reusable assets
-   - Use the API fallback for deletion because the current MCP server does not expose delete tools.
-2. Classify the request when MCP is unavailable or does not expose the required operation:
-   - Markdown content image upload -> `POST /api/content-images`
-   - Case-attached reusable asset draft -> `POST /api/assets`
-   - Standalone user asset upload -> `POST /api/assets/user`
-   - Compatibility standalone asset upload -> `POST /api/assets` with `publishAsset=true`
-   - Asset metadata editing -> `PATCH /api/assets/:id`
-   - Case/task publishing -> `POST /api/tasks`
-   - Case/task editing -> `PATCH /api/tasks/:slug`
-   - Case/task deletion -> `DELETE /api/tasks/:slug` when a signed-in browser session is available
-   - Article/tutorial publishing -> `POST /api/articles`
-   - Article/tutorial editing -> `PATCH /api/articles/:slug`
-   - Article/tutorial deletion -> `DELETE /api/articles/:slug`
-3. If Markdown contains local image paths, upload each image first and replace local paths with returned URLs.
-4. Normalize content into the required payload.
-5. Resolve credentials from the Agent Case Share user configuration file, then `AGENT_CASE_SHARE_API_KEY` and `AGENT_CASE_SHARE_BASE_URL`, then the default base URL `https://agentcaseshare.cn/`. Never pass a personal API key as an MCP tool argument. Invoke `$configure-agent-case-share` when the saved credential is missing.
-6. For API fallback, use `Authorization: Bearer <personal-api-key>` together with the fixed explicit `User-Agent` and `Accept` headers. Set `Content-Type: application/json` for JSON bodies; allow the HTTP client to set multipart boundaries for uploads.
-7. Use hidden/draft defaults unless the user requested public publishing.
-8. For assets that should appear on a case, upload files to `POST /api/assets` first and place returned draft `asset` objects into `reusableAssets` when creating or updating the task.
-9. For assets that should exist in the user's asset library independent of a case, upload files to `POST /api/assets/user` and report the returned `asset.id`.
-10. For editing existing asset metadata, send only fields that should change to `PATCH /api/assets/:id`; do not try to replace the uploaded file through this endpoint.
-11. For deletion, confirm the target slug/id and use the relevant `DELETE` endpoint only when the user explicitly asks to delete.
-12. After success, report returned `slug`, `url`, `taskSlug`, `taskUrl`, `asset.id`, or `asset.url`.
-13. On API failure, show the returned `error` message and ask whether to revise and retry, except for a Cloudflare 1010 signature block: do not retry it automatically and report the administrator action required.
+1. Inspect the connected MCP tool list and confirm the required tool is available.
+2. Gather only the fields needed for the user's requested operation. Use `list_categories` when a category slug is needed.
+3. For local images or asset files, read the file and pass Base64 plus filename and MIME type to the appropriate upload tool; never put credentials in content.
+4. Call the MCP tool and inspect its returned JSON text for the created/updated object.
+5. Report the returned `url`, `taskUrl`, `slug`, or `id` without modifying it.
 
-MCP upload tools require the client to provide file contents as Base64. If the current client cannot read a local file or fetch the returned download URL, continue with the API workflow or report the missing file capability instead of inventing an upload result.
-
-## Content Mapping
-
-For a task/case:
-
-- `title`: concise case title
-- `summary`: short business problem and agent result
-- `categorySlug`: choose a visible industry category slug from `/api/categories`; use the default category table in `references/api.md` when live discovery is unavailable
-- `industry`: optional display name fallback; prefer matching the selected category name
-- `visibility`: default `HIDDEN`; use `PUBLISHED` only when requested
-- `coverImage`: optional case cover URL, recommended ratio 7:4
-- `tags`: comma-separated tags
-- `agentStack`: tools/frameworks/stack
-- `problem`, `solution`, `workflow`, `impact`: map from the user's notes
-- `articleTitle`, `articleContent`: include when the user wants an initial recap article
-- `reusableAssets`: include asset objects returned by `POST /api/assets`
-
-### Workflow Field Formatting
-
-- Build `workflow` as a multi-line string with one logical step per actual newline. In JSON, use `\n` to encode those line breaks.
-- A step may optionally start with `1.`, `1)`, or `1、`; do not add or remove other content while normalizing it.
-- Do not infer steps from periods, spaces, or numbering when all content is on one line. For example, `1. xxx 2. yyy` remains one workflow item.
-- Use this shape when sending a task through the API:
-
-  ```json
-  {
-    "workflow": "1. 提取原始创意与目标体验\n2. 将感觉词翻译为可执行规则\n3. 确定胜负条件和道具行为"
-  }
-  ```
-
-For a standalone user asset:
-
-- Use `POST /api/assets/user`.
-- `file`: local file to upload
-- `title`: concise reusable asset title
-- `type`: one of `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, `OTHER`
-- `summary`: optional reuse guidance
-- `version`: optional version label
-- `visibility`: default `HIDDEN`; use `PUBLISHED` only when requested
-- Do not put standalone user asset responses into a task's `reusableAssets`; use draft assets from `POST /api/assets` for case attachment.
-
-For editing an existing reusable asset:
-
-- Infer the asset `id` from `/assets/:id`, `/api/assets/:id/download`, a personal asset lookup, or the user's provided id.
-- Use `PATCH /api/assets/:id`.
-- Send only metadata fields that should change.
-- Editable fields: `title`, `type`, `summary`, `version`, `visibility` or `status`.
-- This endpoint does not replace the uploaded file; upload a new asset if the binary content must change.
-
-For editing an existing task/case:
-
-- Infer the slug from the task URL when possible.
-- Use `PATCH /api/tasks/:slug`.
-- Send only fields that should change.
-- Include `status` when changing visibility: `{ "status": "HIDDEN" }` or `{ "status": "PUBLISHED" }`.
-- Omit `repositories` and `reusableAssets` unless replacing the full target list.
-- Use `DELETE /api/tasks/:slug` only when the user explicitly asks to delete a case. This endpoint requires a signed-in browser session and returns `{ "url": "/profile" }` on success.
-
-For an article/tutorial:
-
-- `title`: article title
-- `content` or `markdown`: Markdown body
-- `status`: default `DRAFT`; use `PUBLISHED` only when requested
-- `taskSlug` or `taskId`: include when attaching to an existing task
-- `taskTitle` and `taskSummary`: include when no existing task is provided and the API should create a lightweight task container
-- Omit `slug` for a new article so the API generates an `article-xxxxxxxx` identifier; send a known existing slug only when intentionally updating through `POST /api/articles`
-
-For editing an existing article/tutorial:
-
-- Infer the slug from the article URL when possible.
-- Use `PATCH /api/articles/:slug`.
-- Send only fields that should change.
-- Use `taskSlug` only when moving the article to another existing case.
-- Use `DELETE /api/articles/:slug` only when the user explicitly asks to delete an article. It returns the parent `taskSlug` and `taskUrl` on success.
-
-## Public Publishing Rule
-
-If the user says "publish publicly", "make it public", or gives an explicit production publishing instruction:
-
-- Task: `visibility: "PUBLISHED"` or edit with `status: "PUBLISHED"`
-- Article: `status: "PUBLISHED"`
-- Standalone user asset: `visibility: "PUBLISHED"`
-
-Otherwise keep AI-created content hidden/draft.
+If MCP is disconnected, a required write tool is missing, or authentication fails, stop before making changes and tell the user how to connect/reconfigure MCP. Do not fall back to direct API calls.

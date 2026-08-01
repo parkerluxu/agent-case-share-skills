@@ -1,4 +1,9 @@
 interface:
   display_name: "Search Agent Case Share"
-  short_description: "Search and read Agent Case Share content, and download reusable assets."
-  default_prompt: "Use $search-agent-case-share to find relevant Agent Case Share cases, articles, and download assets."
+  short_description: "Search Agent Case Share content through MCP."
+  default_prompt: "Use $search-agent-case-share to find relevant Agent Case Share content through MCP."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "agent-case-share"
+      description: "Agent Case Share MCP server"

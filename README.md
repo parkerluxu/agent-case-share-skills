@@ -60,9 +60,9 @@ gemini extensions link .
 
 ## Desktop Setup
 
-Search and read APIs work without a key for published content.
+Connected MCP read tools work without a key for published content.
 
-Create a personal API key from your Agent Case Share `/profile` page when publishing content, reading hidden/draft content, or using personal retrieval. Then ask your agent to use `$configure-agent-case-share`. It guides you to run its local setup command and stores credentials outside the workspace:
+Create a personal key from your Agent Case Share profile when publishing content, reading hidden/draft content, or using personal retrieval. Then ask your agent to use `$configure-agent-case-share`. It guides you to run its local setup command and stores credentials outside the workspace:
 
 - Windows: `%APPDATA%\\agent-case-share\\config.json`
 - macOS: `~/Library/Application Support/agent-case-share/config.json`
@@ -98,7 +98,7 @@ Skill configuration and MCP registration are separate steps. After running `conf
 
 Register this block separately in Claude Desktop, Cursor, or a custom agent that supports MCP. The MCP server is part of the Agent Case Share web repository, but it runs as a separate process. Production deployments expose the Streamable HTTP endpoint at `https://mcp.agentcaseshare.cn/mcp`; the remote server uses server-level authentication and should not be treated as a per-user credential connection.
 
-When Agent Case Share MCP tools are available, the Skills use them first. If the client has no MCP connection, the required tool is not exposed, or a binary file cannot be passed or downloaded, the Skills fall back to the JSON API using the saved configuration. Never paste a personal API Key into chat or pass it as an MCP tool argument.
+The Skills require a connected Agent Case Share MCP server and call its read/write tools directly. They do not fall back to JSON API requests when MCP is disconnected or a tool is unavailable; they report the connection or capability issue instead. Never paste a personal API Key into chat or pass it as an MCP tool argument.
 
 ## CLI and CI Compatibility
 
@@ -118,7 +118,7 @@ Do not commit real API keys.
 
 Ask your agent to use `$search-agent-case-share` to search categories, tags, cases, articles, news, projects, papers, or Markdown article content, and to read case, project, paper, or article details by URL or slug.
 
-Ask your agent to use `$search-agent-case-share-personal` to search your own Agent Case Share cases and reusable assets with a personal API key.
+Ask your agent to use `$search-agent-case-share-personal` to search your own Agent Case Share cases and reusable assets through MCP.
 
 Ask your agent to use `$configure-agent-case-share` to configure, verify, update, or clear local Agent Case Share credentials.
 
