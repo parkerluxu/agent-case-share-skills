@@ -82,21 +82,17 @@ node plugins/agent-case-share-skills/skills/configure-agent-case-share/scripts/c
 
 ## MCP Setup
 
-Skill configuration and MCP registration are separate steps. After running `configure-agent-case-share`, a local stdio MCP server can reuse the same saved credential without putting the API Key in client configuration:
+The production Agent Case Share MCP server is a protected Streamable HTTP endpoint at `https://mcp.agentcaseshare.cn/mcp`. Run `configure-agent-case-share` once. On Windows, when a Codex configuration is detected, the command saves the key outside the workspace, stores a user-scoped bearer environment variable, and registers this equivalent configuration automatically:
 
-```json
-{
-  "mcpServers": {
-    "agent-case-share": {
-      "command": "npm",
-      "args": ["run", "mcp"],
-      "cwd": "/path/to/agent-case-share"
-    }
-  }
-}
+```toml
+[mcp_servers.agent-case-share]
+url = "https://mcp.agentcaseshare.cn/mcp"
+bearer_token_env_var = "AGENT_CASE_SHARE_API_KEY"
 ```
 
-Register this block separately in Claude Desktop, Cursor, or a custom agent that supports MCP. The MCP server is part of the Agent Case Share web repository, but it runs as a separate process. Production deployments expose the Streamable HTTP endpoint at `https://mcp.agentcaseshare.cn/mcp`; the remote server uses server-level authentication and should not be treated as a per-user credential connection.
+The key is not placed in `config.toml`, JSON MCP configuration, command-line arguments, or tool arguments. The registration is idempotent and leaves unrelated MCP servers unchanged. Restart Codex after setup so it inherits the new user environment variable and reloads the server.
+
+For another MCP client, register the same URL using that client's environment-backed bearer-token setting. Do not put the literal personal key in a JSON configuration file. If the client only supports OAuth for remote MCP, use its OAuth flow instead of copying the key into headers.
 
 The Skills require a connected Agent Case Share MCP server and call its read/write tools directly. They do not fall back to JSON API requests when MCP is disconnected or a tool is unavailable; they report the connection or capability issue instead. Never paste a personal API Key into chat or pass it as an MCP tool argument.
 
@@ -110,7 +106,7 @@ Use these environment variables in your shell or agent runtime:
 AGENT_CASE_SHARE_API_KEY=acsp_live_replace_me
 ```
 
-The setup command always saves `https://agentcaseshare.cn/` as the base URL. Set optional `AGENT_CASE_SHARE_BASE_URL` only for CLI or CI runs targeting a different Agent Case Share deployment.
+The setup command saves `https://agentcaseshare.cn/` as the API base URL and configures the remote MCP URL separately. Set optional `AGENT_CASE_SHARE_BASE_URL` only for CLI or CI runs targeting a different Agent Case Share deployment.
 
 Do not commit real API keys.
 
