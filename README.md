@@ -106,7 +106,7 @@ Use these environment variables in your shell or agent runtime:
 AGENT_CASE_SHARE_API_KEY=acsp_live_replace_me
 ```
 
-The setup command saves `https://agentcaseshare.cn/` as the API base URL and configures the remote MCP URL separately. Source owners may use the local stdio server as a development fallback; ordinary users should use the hosted remote MCP. Set optional `AGENT_CASE_SHARE_BASE_URL` only for CLI or CI runs targeting a different Agent Case Share deployment.
+The setup command saves `https://agentcaseshare.cn/` as the API base URL and configures the remote MCP URL separately. Use the hosted remote MCP by default. The local stdio server is available for local development. Set optional `AGENT_CASE_SHARE_BASE_URL` only for CLI or CI runs targeting a different Agent Case Share deployment.
 
 Do not commit real API keys.
 
