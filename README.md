@@ -82,7 +82,7 @@ node plugins/agent-case-share-skills/skills/configure-agent-case-share/scripts/c
 
 ## MCP Setup
 
-The production Agent Case Share MCP server is a protected Streamable HTTP endpoint at `https://mcp.agentcaseshare.cn/mcp`. Run `configure-agent-case-share` once. On Windows, when a Codex configuration is detected, the command saves the key outside the workspace, stores a user-scoped bearer environment variable, and registers this equivalent configuration automatically:
+The production Agent Case Share MCP server is a protected Streamable HTTP endpoint at `https://mcp.agentcaseshare.cn/mcp`. Ordinary users do not need the Agent Case Share source repository. Run `configure-agent-case-share` once. On Windows, when a Codex configuration is detected, the command saves the key outside the workspace, stores a user-scoped bearer environment variable, and registers this equivalent configuration automatically:
 
 ```toml
 [mcp_servers.agent-case-share]
@@ -106,7 +106,7 @@ Use these environment variables in your shell or agent runtime:
 AGENT_CASE_SHARE_API_KEY=acsp_live_replace_me
 ```
 
-The setup command saves `https://agentcaseshare.cn/` as the API base URL and configures the remote MCP URL separately. Set optional `AGENT_CASE_SHARE_BASE_URL` only for CLI or CI runs targeting a different Agent Case Share deployment.
+The setup command saves `https://agentcaseshare.cn/` as the API base URL and configures the remote MCP URL separately. Source owners may use the local stdio server as a development fallback; ordinary users should use the hosted remote MCP. Set optional `AGENT_CASE_SHARE_BASE_URL` only for CLI or CI runs targeting a different Agent Case Share deployment.
 
 Do not commit real API keys.
 

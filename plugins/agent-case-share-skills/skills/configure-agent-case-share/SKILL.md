@@ -5,7 +5,7 @@ description: Configure the local Agent Case Share MCP credentials for Codex, Cla
 
 # Configure Agent Case Share
 
-Use this skill to configure the current user's local Agent Case Share credentials.
+Use this skill to configure the current user's Agent Case Share credentials for remote MCP access. Ordinary users should use the hosted Streamable HTTP MCP server; the local stdio server is only for users who maintain a checkout of the Agent Case Share web repository.
 
 ## Safety
 
@@ -25,7 +25,7 @@ Use this skill to configure the current user's local Agent Case Share credential
    ```bash
    node /absolute/path/to/configure-agent-case-share/scripts/configure.mjs
    ```
-2. The script securely prompts for the personal key created in the user's Agent Case Share profile, saves it outside the workspace, and, when a Codex configuration is detected, registers the remote MCP server idempotently with a bearer-token environment reference:
+2. The script securely prompts for the personal key created in the user's Agent Case Share profile, saves it outside the workspace, and, when a Codex configuration is detected, registers the hosted remote MCP server idempotently with a bearer-token environment reference:
    ```toml
    [mcp_servers.agent-case-share]
    url = "https://mcp.agentcaseshare.cn/mcp"
@@ -37,6 +37,7 @@ Use this skill to configure the current user's local Agent Case Share credential
    ```bash
    node /absolute/path/to/configure-agent-case-share/scripts/configure.mjs --status
    ```
+   The result must show both `MCP bearer environment: configured` and `Codex MCP registration: configured`. If it reports missing bearer token configuration, run the setup command again without `--no-mcp`.
 5. To intentionally delete the saved credential and user-scoped bearer variable, run:
    ```bash
    node /absolute/path/to/configure-agent-case-share/scripts/configure.mjs --clear
@@ -45,7 +46,7 @@ Use this skill to configure the current user's local Agent Case Share credential
 
 ## Credential Resolution
 
-The local CLI and compatibility integrations read the configuration file written by this skill. Codex Streamable HTTP MCP reads the bearer token from the user-scoped `AGENT_CASE_SHARE_API_KEY` environment variable configured by the script. After setup, do not copy the personal API key into an MCP client JSON/TOML file or pass it as a tool argument.
+Codex Streamable HTTP MCP reads the bearer token from the user-scoped `AGENT_CASE_SHARE_API_KEY` environment variable configured by the script. Other remote MCP clients must use their own environment-backed secret or OAuth mechanism. After setup, do not copy the personal API key literally into an MCP client JSON/TOML file or pass it as a tool argument. The local stdio server is an optional source-owner fallback and reads the saved configuration file directly.
 
 Other Agent Case Share skills resolve settings in this order:
 

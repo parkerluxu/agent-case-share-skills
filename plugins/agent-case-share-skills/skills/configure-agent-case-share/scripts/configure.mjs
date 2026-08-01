@@ -145,7 +145,12 @@ function codexMcpStatus() {
   }
 
   const output = `${result.stdout || ""}\n${result.stderr || ""}`;
-  return output.includes(MCP_SERVER_NAME) && output.includes(MCP_URL) ? "configured" : "not configured";
+  const hasServer = output.includes(MCP_SERVER_NAME) && output.includes(MCP_URL);
+  if (!hasServer) {
+    return "not configured";
+  }
+
+  return output.includes(MCP_BEARER_ENV_VAR) ? "configured" : "missing bearer token configuration";
 }
 
 function setWindowsUserEnvironmentVariable(value) {

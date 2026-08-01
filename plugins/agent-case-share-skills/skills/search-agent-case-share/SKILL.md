@@ -9,7 +9,15 @@ Use the Agent Case Share MCP server as the only data access layer for discovery 
 
 ## MCP connection
 
-Use an already connected Agent Case Share MCP server. For a local connection, the server can be registered with:
+Use an already connected Agent Case Share MCP server. Ordinary users should connect to the hosted Streamable HTTP server with an environment-backed bearer token. Codex setup is:
+
+```toml
+[mcp_servers.agent-case-share]
+url = "https://mcp.agentcaseshare.cn/mcp"
+bearer_token_env_var = "AGENT_CASE_SHARE_API_KEY"
+```
+
+For source owners, a local connection can be registered with:
 
 ```json
 {
@@ -23,7 +31,7 @@ Use an already connected Agent Case Share MCP server. For a local connection, th
 }
 ```
 
-The remote Streamable HTTP endpoint, when supplied by the user's client, is `https://mcp.agentcaseshare.cn/mcp`. Never put a personal key in MCP tool arguments or client configuration.
+The remote Streamable HTTP endpoint is `https://mcp.agentcaseshare.cn/mcp`. Never put the literal personal key in MCP tool arguments or client configuration; use the configuration skill or the client's secret/environment mechanism.
 
 ## Tool mapping
 
