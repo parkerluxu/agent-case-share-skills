@@ -8,12 +8,12 @@ This reference documents the MCP contract used by the personal search skill. It 
 | --- | --- | --- |
 | `search_my_content` | `q`, `type` (`case\|asset`), `tag`, `limit` (1-50) | Search the user's cases and assets |
 | `list_my_cases` | `q`, `category`, `tag`, `status`, `page`, `limit` (1-50) | Filter personal cases |
-| `get_my_case` | `slug` | Read one personal case with separate attachments and reusable assets |
+| `get_my_case` | `slug` | Read one personal case with separate attachments and reusable assets, plus models, integrations, prompts, and reproduction details |
 | `list_my_assets` | `q`, `type`, `source`, `status`, `page`, `limit` (1-50) | Filter personal assets |
 | `get_my_asset` | `id` | Read one personal asset |
 | `get_asset_download_url` | `id` | Resolve a file or source URL |
 
-Tool results are JSON text. Search/list results normally contain `items`; detail results contain `case` or `asset`. Case detail returns `attachments` separately from `reusableAssets`. Preserve each returned URL, filename, status, slug, and ID exactly.
+Tool results are JSON text. Search/list results normally contain `items`; detail results contain `case` or `asset`. Case detail returns `attachments` separately from `reusableAssets`, and may include `models`, `integrations`, `prompts`, and `reproduction`. Preserve each returned URL, filename, status, slug, and ID exactly.
 
 ## Retrieval sequence
 

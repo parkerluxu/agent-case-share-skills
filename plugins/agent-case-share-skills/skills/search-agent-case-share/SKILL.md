@@ -36,7 +36,7 @@ The remote Streamable HTTP endpoint is `https://mcp.agentcaseshare.cn/mcp`. Neve
 ## Tool mapping
 
 - General discovery: `search_content` with `q`, optional `type`, `tag`, `category`, and `limit`.
-- Case lists and filters: `list_cases`; one case plus its `attachments` and `reusableAssets`: `get_case` with its opaque `slug`.
+- Case lists and filters: `list_cases`; one case plus its `attachments`, `reusableAssets`, models, integrations, prompts, and reproduction details: `get_case` with its opaque `slug`.
 - Article Markdown: `get_article` with its opaque `slug`.
 - Project or paper details: `get_project` or `get_paper` with its opaque `slug`.
 - Categories and tags: `list_categories` and `list_tags`.
@@ -60,7 +60,7 @@ If a required MCP tool is unavailable, say that the Agent Case Share MCP connect
 
 - Use `type=task`, `article`, `news`, `project`, `paper`, or `asset` only when the user requests that content type.
 - Use category slugs from `list_categories` and tag values from `list_tags`.
-- Use `get_case` before `get_article` when the user needs the complete case context.
+- Use `get_case` before `get_article` when the user needs the complete case context, runtime/model configuration, toolchain, Prompt details, or reproduction and verification status.
 - Find attachments only through `get_case`; `search_content` and `list_assets` intentionally exclude case attachments.
 - Use `get_article` when the user specifically needs article Markdown.
 - Use `list_assets` for public asset discovery and `get_asset_download_url` for a selected file.

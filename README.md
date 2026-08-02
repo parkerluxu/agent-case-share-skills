@@ -120,7 +120,7 @@ Ask your agent to use `$configure-agent-case-share` to configure, verify, update
 
 Use `$agent-case-share-personal-retrieval` when the current task would benefit from your prior cases, case attachments, or reusable assets. The Agent may proactively retrieve relevant personal context for substantive tasks; explicit invocation or a direct request to search/reuse the library always triggers retrieval.
 
-Ask your agent to use `$publish-agent-case-share` to publish or update a case, article, tutorial, Markdown image, case attachment, reusable asset, or user-editable attachment/asset metadata. Existing-case attachments use atomic MCP upload/delete tools so ordinary attachment changes do not replace the case's complete file list.
+Ask your agent to use `$publish-agent-case-share` to publish or update a case, article, tutorial, Markdown image, case attachment, reusable asset, or user-editable attachment/asset metadata. Cases can include structured runtime/model configuration, tool/MCP/plugin/Skill entries, Prompt metadata and visibility, plus reproduction and verification details. Existing-case attachments use atomic MCP upload/delete tools so ordinary attachment changes do not replace the case's complete file list.
 
 The skill defaults AI-created tasks to hidden and articles to draft unless you explicitly ask for public publishing.
 

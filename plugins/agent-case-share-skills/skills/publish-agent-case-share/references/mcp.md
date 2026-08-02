@@ -6,8 +6,8 @@ This reference documents the connected MCP write tools. It intentionally omits d
 
 | Tool | Required/important fields | Use |
 | --- | --- | --- |
-| `create_case` | `title`, `summary`; optional case fields, `visibility`, `article*`, `repository*`, `reusableAssets` | Create a case, optional first article, attachments, and reusable assets |
-| `update_case` | `slug`; optional case fields, repositories, complete `reusableAssets` target list | Update a user-owned case |
+| `create_case` | `title`, `summary`; optional case fields such as `agentStack`, `visibility`, `article*`, `repository*`, `reusableAssets`, `models`, `integrations`, `prompts`, `reproduction` | Create a case, optional first article, attachments, reusable assets, and reproducibility details |
+| `update_case` | `slug`; optional case fields, repositories, complete `reusableAssets` target list, `models`, `integrations`, `prompts`, `reproduction` | Update a user-owned case and its reproducibility details |
 | `create_article` | `title`; optional `content`/`markdown`, `taskSlug`/`taskId`, status | Create an article |
 | `update_article` | `slug`; optional title/content/markdown/excerpt/status/order | Update an article |
 | `upload_content_image` | `fileBase64`, `fileName`, optional `mimeType` | Upload a Markdown image |
@@ -18,6 +18,15 @@ This reference documents the connected MCP write tools. It intentionally omits d
 | `update_asset` | `id`; optional `title`, `summary`, `version`, `type`, and visibility/status | Update an owned reusable asset or attachment metadata |
 
 Supported asset types are `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, and `OTHER`. `purpose` is `ATTACHMENT` or `REUSABLE`; omit it only when the default `REUSABLE` behavior is intended. Visibility/status values are `DRAFT`, `PUBLISHED`, and `HIDDEN` where accepted by the tool.
+
+## Structured reproducibility fields
+
+- `models`: array of at most 8 records. `modelId` is required; optional fields are `id`, `provider`, `version`, `role`, `purpose`, and `parameters`. `role` is `PRIMARY`, `AUXILIARY`, `EMBEDDING`, `EVALUATION`, or `OTHER`.
+- `integrations`: array of at most 16 records. `name` and `type` are required; optional fields are `id`, `version`, `sourceUrl`, `purpose`, and `setupNotes`. `type` is `TOOL`, `MCP`, `PLUGIN`, or `SKILL`. Prefer this structure for tools and integrations; reserve the legacy `tools` string for an optional concise overview.
+- `prompts`: array of at most 8 records. `title` and `content` are required; optional fields are `id`, `role`, `summary`, `variables`, `version`, and `visibility`. `role` is `SYSTEM`, `DEVELOPER`, `USER`, `TEMPLATE`, or `OTHER`; `visibility` is `PUBLIC`, `SUMMARY_ONLY`, or `PRIVATE`. Use `SUMMARY_ONLY` unless the author explicitly permits public prompt text.
+- `reproduction`: one object, or `null` to clear it. Its optional text fields are `prerequisites`, `steps`, `sampleInput`, `expectedResult`, `sampleOutput`, `knownLimitations`, and `verificationNotes`. `verificationStatus` is `UNVERIFIED`, `AUTHOR_TESTED`, or `COMMUNITY_VERIFIED`; `verifiedAt` must be a date string accepted by `Date.parse`.
+
+These fields are optional. Do not fabricate a model version, configuration parameter, installation method, prompt, test result, verification date, or limitation. Redact credentials and sensitive data before publishing.
 
 ## Case attachment workflow
 
