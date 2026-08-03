@@ -53,6 +53,8 @@ When creating or updating a case, use the structured reproducibility fields when
 - Prompts: send `prompts` as up to eight entries. Each requires `title` and `content`; include `role`, `version`, `variables`, `summary`, and `visibility` as appropriate. Valid roles are `SYSTEM`, `DEVELOPER`, `USER`, `TEMPLATE`, and `OTHER`. Default to `SUMMARY_ONLY`; set `PUBLIC` only when the user explicitly permits the full text to be shown, and use `PRIVATE` for the author's own reference.
 - Reproduction and verification: send one `reproduction` object with `prerequisites`, `steps`, `sampleInput`, `expectedResult`, `sampleOutput`, `knownLimitations`, `verificationStatus`, `verifiedAt`, and `verificationNotes`. Valid statuses are `UNVERIFIED`, `AUTHOR_TESTED`, and `COMMUNITY_VERIFIED`. Use an ISO-parseable date for `verifiedAt` and do not claim community verification unless the user states it.
 
+For both the case-level `workflow` field and `reproduction.steps`, put each workflow stage or actionable step on its own line. Use a newline-separated numbered list or bullet list, for example `1. Collect source files\n2. Run extraction\n3. Review the result`. Do not combine multiple steps into one paragraph or separate them only with commas, semicolons, or other inline punctuation. Preserve existing line breaks when updating a case; if a source paragraph cannot be split without changing its meaning, ask the user for the step boundaries.
+
 Never put secrets, access tokens, private endpoints, personal data, or unredacted sensitive prompt content into these fields. If the user requests an update that deliberately clears the reproduction section, send `reproduction: null`.
 
 ## Workflow

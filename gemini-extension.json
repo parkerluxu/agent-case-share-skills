@@ -1,6 +1,6 @@
 {
   "name": "agent-case-share-skills",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Search, retrieve, publish, and edit Agent Case Share content and case attachments through MCP.",
   "contextFileName": "GEMINI.md",
   "settings": [

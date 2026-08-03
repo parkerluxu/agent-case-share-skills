@@ -8,7 +8,7 @@ on:
       tag:
         description: "Release tag to package"
         required: true
-        default: "v1.0.4"
+        default: "v1.0.5"
 
 jobs:
   sync:

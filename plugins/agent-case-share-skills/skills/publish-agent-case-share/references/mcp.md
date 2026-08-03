@@ -26,6 +26,8 @@ Supported asset types are `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG
 - `prompts`: array of at most 8 records. `title` and `content` are required; optional fields are `id`, `role`, `summary`, `variables`, `version`, and `visibility`. `role` is `SYSTEM`, `DEVELOPER`, `USER`, `TEMPLATE`, or `OTHER`; `visibility` is `PUBLIC`, `SUMMARY_ONLY`, or `PRIVATE`. Use `SUMMARY_ONLY` unless the author explicitly permits public prompt text.
 - `reproduction`: one object, or `null` to clear it. Its optional text fields are `prerequisites`, `steps`, `sampleInput`, `expectedResult`, `sampleOutput`, `knownLimitations`, and `verificationNotes`. `verificationStatus` is `UNVERIFIED`, `AUTHOR_TESTED`, or `COMMUNITY_VERIFIED`; `verifiedAt` must be a date string accepted by `Date.parse`.
 
+Formatting rule: send `workflow` and `reproduction.steps` as newline-separated steps, with one workflow point or action per line. Prefer numbered or bullet lines. Do not send several workflow steps as a single paragraph or an inline comma-/semicolon-separated list; preserving line breaks is required for step recognition.
+
 These fields are optional. Do not fabricate a model version, configuration parameter, installation method, prompt, test result, verification date, or limitation. Redact credentials and sensitive data before publishing.
 
 ## Case attachment workflow
