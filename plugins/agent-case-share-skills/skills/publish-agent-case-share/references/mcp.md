@@ -10,6 +10,9 @@ This reference documents the connected MCP write tools. It intentionally omits d
 | `update_case` | `slug`; optional case fields, repositories, complete `reusableAssets` target list, `models`, `integrations`, `prompts`, `reproduction` | Update a user-owned case and its reproducibility details |
 | `create_article` | `title` and one of `content` or `markdown`; optional article and case-container fields listed below | Create or upsert an article |
 | `update_article` | `slug`; optional title/content/markdown/excerpt/status/order | Update an article |
+| `create_case_video` | `caseSlug`, `title`, `sourceUrl`; optional `summary`, `status` | Add an external video to an existing case |
+| `update_case_video` | `caseSlug`, `videoId`; optional `title`, `summary`, `sourceUrl`, `sortOrder`, `status` | Update one case video record |
+| `delete_case_video` | `caseSlug`, `videoId` | Delete one case video record without affecting the external video |
 | `upload_content_image` | `fileBase64`, `fileName`, optional `mimeType` | Upload a Markdown image |
 | `upload_case_attachment` | `caseSlug`, `fileBase64`, `fileName`; optional `mimeType`, `title`, `summary` | Atomically append an attachment to an existing case |
 | `delete_case_attachment` | `caseSlug`, `attachmentId` | Atomically delete one case attachment |
@@ -41,6 +44,16 @@ Formatting rule: send `workflow` and `reproduction.steps` as newline-separated s
 
 These fields are optional. Do not fabricate a model version, installation method, prompt, test result, or verification date. Redact credentials and sensitive data before publishing.
 
+## Case video workflow
+
+- Case videos are external links, not uploaded video files. Do not send Base64 content, local file paths, filenames, iframe HTML, `provider`, `externalId`, or `embedUrl`; the website derives platform and playback metadata from `sourceUrl`.
+- `create_case_video` requires `caseSlug`, `title`, and an absolute HTTP(S) `sourceUrl`. Optional `summary` is free text. Optional `status` is `DRAFT`, `PUBLISHED`, or `HIDDEN`; use `HIDDEN` by default and `PUBLISHED` only on an explicit public-publishing request.
+- `update_case_video` requires the opaque `caseSlug` and `videoId`. Send only requested changes: non-empty `title`, `summary`, an absolute HTTP(S) `sourceUrl`, or a non-negative integer `sortOrder`. Although the tool accepts `status`, do not claim a visibility change unless the returned record confirms it.
+- `delete_case_video` requires the exact `caseSlug` and `videoId`. Obtain the ID from `get_my_case.videos` or `get_case.videos`; never derive it from a title or URL. Deletion removes only the Agent Case Share record, not the externally hosted video.
+- Recognized source platforms are Bilibili, YouTube, Vimeo, Tencent Video, Youku, Xigua, AcFun, Dailymotion, Loom, Wistia, TikTok, Streamable, Facebook, Instagram, and TED. The website may enable only a subset and rejects unsupported URL shapes.
+- The website normalizes accepted URLs, rejects duplicate videos in the same case, and enforces its configured per-case limit. Report validation or limit errors without retrying with a fabricated provider or embed URL.
+- When the user asks to create a case with videos, create the case first, reuse its returned slug, then call `create_case_video` once per requested video.
+
 ## Case attachment workflow
 
 - New case: call `upload_asset` with `purpose: "ATTACHMENT"`, then place the returned metadata in `create_case.reusableAssets`.
@@ -56,10 +69,11 @@ Accepted uploaded file extensions are `.zip`, `.md`, `.txt`, `.json`, `.yaml`, `
 ## Publishing rules
 
 - Default AI-created cases to `visibility: "HIDDEN"`.
+- Default AI-added case videos to `status: "HIDDEN"`.
 - Default AI-created articles to `status: "DRAFT"`.
 - Default standalone assets to `visibility: "HIDDEN"`.
 - Use `PUBLISHED` only after the user explicitly requests public publishing.
 - Use `list_categories` before sending an unknown category slug.
 - Read local files only to provide Base64, filename, and MIME type to upload tools. Never include credentials in content.
 
-Only case-attachment deletion is exposed. Do not emulate deletion of cases, articles, or reusable assets with another protocol. If MCP is disconnected, a tool is missing, or authentication fails, stop before writing and ask the user to connect or reconfigure MCP.
+Only case-attachment and case-video deletion are exposed. Do not emulate deletion of cases, articles, or reusable assets with another protocol. If MCP is disconnected, a tool is missing, or authentication fails, stop before writing and ask the user to connect or reconfigure MCP.

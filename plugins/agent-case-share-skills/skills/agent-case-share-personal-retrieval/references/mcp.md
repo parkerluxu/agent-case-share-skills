@@ -12,7 +12,7 @@ This reference describes the MCP contract for personal retrieval. The skill invo
 }
 ```
 
-The delegated skill calls `search_my_content`. Search results are lightweight and exclude case attachments. Use `get_my_case` for full case fields plus separate `attachments` and `reusableAssets` collections, and `get_my_asset` for full reusable asset metadata. Use `get_asset_download_url` only when an attachment or asset file is needed.
+The delegated skill calls `search_my_content`. Search results are lightweight and exclude case attachments. Use `get_my_case` for full case fields plus `videos` and separate `attachments` and `reusableAssets` collections, and `get_my_asset` for full reusable asset metadata. Use `get_asset_download_url` only when an attachment or asset file is needed.
 
 ## MCP result shapes
 
@@ -47,6 +47,8 @@ type PersonalCaseAttachment = {
 ```
 
 Detail results are JSON objects containing `case` or `asset`. Preserve opaque slugs/IDs, returned URLs, filenames, statuses, and asset types. Do not invent missing fields or derive identifiers from titles.
+
+Case detail videos are linked reference material and can include `id`, `title`, `summary`, `sourceUrl`, `embedUrl`, `provider`, `externalId`, `sortOrder`, `status`, and `updatedAt`. Preserve source URLs, embed URLs, and IDs exactly; do not construct playback URLs.
 
 ## Retrieval rules
 

@@ -1,7 +1,7 @@
 interface:
   display_name: "Agent Case Share Personal Retrieval"
-  short_description: "Retrieve personal cases, attachments, and assets through MCP."
-  default_prompt: "Use $agent-case-share-personal-retrieval to reuse relevant cases, attachments, or assets through MCP."
+  short_description: "Retrieve personal cases, videos, attachments, and assets."
+  default_prompt: "Use $agent-case-share-personal-retrieval to reuse relevant cases, videos, attachments, or assets through MCP."
 dependencies:
   tools:
     - type: "mcp"
