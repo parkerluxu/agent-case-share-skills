@@ -47,11 +47,11 @@ Read `references/mcp.md` before a write when exact fields, enums, or upload requ
 
 When creating or updating a case, use the structured reproducibility fields whenever the user provides them. All are optional, so keep first-time publishing lightweight and do not invent missing details.
 
-- Runtime environment: use the existing `agentStack` field for the AI client or platform (for example Codex, Claude Code, Cursor, or Dify) and its version when known. Record model-specific settings in `models`; add setup prerequisites to `reproduction.prerequisites` when relevant.
-- Models: send `models` as up to eight entries. Every entry requires `modelId`; use `provider`, `version` (or snapshot date), `role`, `purpose`, and `parameters` for the remaining context. Valid roles are `PRIMARY`, `AUXILIARY`, `EMBEDDING`, `EVALUATION`, and `OTHER`.
-- Tools and integrations: prefer `integrations` over the legacy free-text `tools` field. Send up to 16 entries with required `name`, a `type` of `TOOL`, `MCP`, `PLUGIN`, or `SKILL`, plus `version`, `sourceUrl`, `purpose`, and `setupNotes` when available. This covers a tool's install or configuration method without duplicating it in prose.
-- Prompts: send `prompts` as up to eight entries. Each requires `title` and `content`; include `role`, `version`, `variables`, `summary`, and `visibility` as appropriate. Valid roles are `SYSTEM`, `DEVELOPER`, `USER`, `TEMPLATE`, and `OTHER`. Default to `SUMMARY_ONLY`; set `PUBLIC` only when the user explicitly permits the full text to be shown, and use `PRIVATE` for the author's own reference.
-- Reproduction and verification: send one `reproduction` object with `prerequisites`, `steps`, `sampleInput`, `expectedResult`, `sampleOutput`, `knownLimitations`, `verificationStatus`, `verifiedAt`, and `verificationNotes`. Valid statuses are `UNVERIFIED`, `AUTHOR_TESTED`, and `COMMUNITY_VERIFIED`. Use an ISO-parseable date for `verifiedAt` and do not claim community verification unless the user states it.
+- Runtime environment: use `agentStack` for the AI client or platform (for example Codex, Claude Code, Cursor, or Dify) and its version when known. Record model identity in `models`; add setup prerequisites to `reproduction.prerequisites` when relevant.
+- Models: send `models` as up to eight entries. Every entry requires `modelId`; optional fields are `id`, `provider`, `version` (or snapshot date), and `purpose`.
+- Tools and integrations: send `integrations` as up to 16 entries. Every entry requires `name` and a `type` of `TOOL`, `MCP`, `PLUGIN`, or `SKILL`; optional fields are `id`, `sourceUrl`, `purpose`, and `setupNotes`.
+- Prompts: send `prompts` as up to eight entries. Every entry requires `title` and `content`; optional fields are `id`, `summary`, and `visibility`. Default visibility to `SUMMARY_ONLY`; set `PUBLIC` only when the user explicitly permits the full text to be shown, and use `PRIVATE` for the author's own reference.
+- Reproduction and verification: send one `reproduction` object with optional `prerequisites`, `steps`, `sampleInput`, `sampleOutput`, `verificationStatus`, `verifiedAt`, and `verificationNotes`. Valid statuses are `UNVERIFIED`, `AUTHOR_TESTED`, and `COMMUNITY_VERIFIED`. Use an ISO-parseable date for `verifiedAt` and do not claim community verification unless the user states it.
 
 For both the case-level `workflow` field and `reproduction.steps`, put each workflow stage or actionable step on its own line. Use a newline-separated numbered list or bullet list, for example `1. Collect source files\n2. Run extraction\n3. Review the result`. Do not combine multiple steps into one paragraph or separate them only with commas, semicolons, or other inline punctuation. Preserve existing line breaks when updating a case; if a source paragraph cannot be split without changing its meaning, ask the user for the step boundaries.
 
@@ -60,7 +60,7 @@ Never put secrets, access tokens, private endpoints, personal data, or unredacte
 ## Workflow
 
 1. Inspect the connected MCP tool list and confirm the required tool is available.
-2. Gather only the fields needed for the user's requested operation. For a reproducible case, collect the runtime environment, structured models, integrations, prompts, and reproduction/verification details that the user has supplied. Use `list_categories` when a category slug is needed.
+2. Gather only the currently supported fields needed for the user's requested operation. For a reproducible case, collect the runtime environment, structured models, integrations, prompts, and reproduction/verification details that the user has supplied. Use `list_categories` when a category slug is needed.
 3. For local images, attachments, or asset files, read the file and pass Base64 plus filename and MIME type to the appropriate upload tool; never put credentials in content.
 4. Select the atomic attachment tool for an existing case. Do not send `update_case.reusableAssets` unless the user intentionally supplied the complete desired collection.
 5. Call the MCP tool and inspect its returned JSON text for the created, updated, or deleted object.
