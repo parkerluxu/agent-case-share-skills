@@ -1,7 +1,7 @@
 interface:
   display_name: "Search My Agent Case Share"
-  short_description: "Search personal cases, videos, attachments, and assets."
-  default_prompt: "Use $search-agent-case-share-personal to find my cases, videos, attachments, and assets through MCP."
+  short_description: "Search saved items and personal cases, videos, and assets."
+  default_prompt: "Use $search-agent-case-share-personal to find my saved items, cases, videos, attachments, and assets through MCP."
 dependencies:
   tools:
     - type: "mcp"

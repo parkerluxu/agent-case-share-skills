@@ -1,7 +1,7 @@
 {
   "name": "agent-case-share-skills",
-  "version": "1.0.7",
-  "description": "Search, retrieve, publish, and edit Agent Case Share content, case videos, attachments, and personal assets through MCP.",
+  "version": "1.0.8",
+  "description": "Search, retrieve saved items, publish, and edit Agent Case Share content, case videos, attachments, and personal assets through MCP.",
   "author": {
     "name": "parkerluxu",
     "url": "https://github.com/parkerluxu"
@@ -13,8 +13,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Agent Case Share",
-    "shortDescription": "Search, retrieve, and publish Agent Case Share content.",
-    "longDescription": "Search and automatically retrieve public and personal Agent Case Share content through MCP, then publish or edit cases, external case videos, case attachments, articles, Markdown images, reusable assets, and user-editable metadata from AI coding agents.",
+    "shortDescription": "Search, retrieve saved items, and publish content.",
+    "longDescription": "Search and automatically retrieve public, saved, and personal Agent Case Share content through MCP, then publish or edit cases, external case videos, case attachments, articles, Markdown images, reusable assets, and user-editable metadata from AI coding agents.",
     "developerName": "parkerluxu",
     "category": "Productivity",
     "capabilities": ["Write"],
@@ -25,6 +25,7 @@
       "Publish this Markdown article as a draft.",
       "Upload these reusable assets to a case.",
       "Find my uploaded Agent Case Share assets.",
+      "Show my saved Agent Case Share items.",
       "Read a project or paper detail by URL.",
       "Retrieve relevant experience from my personal Agent Case Share library."
     ],

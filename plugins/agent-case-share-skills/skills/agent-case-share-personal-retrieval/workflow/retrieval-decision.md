@@ -44,7 +44,7 @@ def decide_retrieval(input):
         return no_retrieval("User opted out of personal retrieval")
 
     explicit = bool(input.explicit_skill_call)
-    personal_request = clearly_asks_to_search_or_reuse_personal_library(input.user_message)
+    personal_request = clearly_asks_to_search_or_reuse_personal_library_or_saved_items(input.user_message)
     task_benefit = substantive_domain_task_likely_benefits_from_prior_cases(input.user_message)
 
     if not (explicit or personal_request or task_benefit):
@@ -92,4 +92,5 @@ These should return `should_retrieve: false`:
 - A case slug or asset ID narrows retrieval after the decision is positive; it is not required for retrieval.
 - A generic word such as `案例`, `经验`, `skill`, or `asset` is only a signal when the surrounding request asks to search, reuse, or reference personal material.
 - If the user explicitly names a case or asset, prefer it over broad search results.
+- If the user explicitly asks for saved or favorited content, use `list_my_favorites`; it only returns items that remain publicly accessible.
 - If the task does not benefit from personal context, do not search merely because this skill is installed.
