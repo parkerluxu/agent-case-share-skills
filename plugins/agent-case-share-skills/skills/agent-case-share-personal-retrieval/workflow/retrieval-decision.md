@@ -72,6 +72,7 @@ These should return `should_retrieve: true`:
 - `/skill agent-case-share-personal-retrieval "推荐系统"`
 - `参考我以前在 Agent Case Share 里的推荐系统案例`
 - `找我上传的客服质检 Skill，下载后参考它的工作流`
+- `把我之前的客服质检案例导出成 ZIP`
 - `设计一个 Milvus 向量检索方案，看看我以前有没有类似实践`
 - `帮我排查这个 Agent 工作流问题，优先参考我的历史案例`
 
@@ -94,3 +95,4 @@ These should return `should_retrieve: false`:
 - If the user explicitly names a case or asset, prefer it over broad search results.
 - If the user explicitly asks for saved or favorited content, use `list_my_favorites`; it only returns items that remain publicly accessible.
 - If the task does not benefit from personal context, do not search merely because this skill is installed.
+- A request to download a personal asset, case attachment, or case export ZIP is a personal-library operation; apply the authentication gate in `retrieval-workflow.md` before calling the download tool.

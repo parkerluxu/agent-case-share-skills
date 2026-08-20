@@ -112,9 +112,9 @@ Do not commit real API keys.
 
 ## Usage
 
-Ask your agent to use `$search-agent-case-share` to search categories, tags, cases, articles, news, projects, papers, or Markdown article content, and to read case videos and attachments from case details.
+Ask your agent to use `$search-agent-case-share` to search categories, tags, cases, articles, news, projects, papers, or Markdown article content, read case videos and attachments from case details, download assets or attachments, or export a case as a ZIP package. File downloads and case exports require the user to be signed in.
 
-Ask your agent to use `$search-agent-case-share-personal` to list saved cases, articles, reusable assets, open-source projects, or papers, search your own cases and reusable assets, or read videos and attachments from one of your case details through MCP. The MCP currently reads saved items only; use the website to save or remove a favorite.
+Ask your agent to use `$search-agent-case-share-personal` to list saved cases, articles, reusable assets, open-source projects, or papers, search your own cases and reusable assets, read videos and attachments from one of your case details, download personal files, or export a case ZIP through MCP. Downloads and exports require the user to be signed in. The MCP currently reads saved items only; use the website to save or remove a favorite.
 
 Ask your agent to use `$configure-agent-case-share` to configure, verify, update, or clear local Agent Case Share credentials.
 
