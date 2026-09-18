@@ -1,7 +1,7 @@
 interface:
   display_name: "Agent Case Share Personal Retrieval"
-  short_description: "Retrieve personal content and authenticated case packages."
-  default_prompt: "Use $agent-case-share-personal-retrieval to reuse saved items, cases, attachments, assets, or authenticated case ZIP exports through MCP."
+  short_description: "Retrieve personal cases, Agent environments, and Sessions."
+  default_prompt: "Use $agent-case-share-personal-retrieval to reuse saved items, cases, Agent setup, Session history, assets, or case exports through MCP."
 dependencies:
   tools:
     - type: "mcp"

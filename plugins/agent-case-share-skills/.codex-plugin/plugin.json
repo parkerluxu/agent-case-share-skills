@@ -1,7 +1,7 @@
 {
   "name": "agent-case-share-skills",
-  "version": "1.0.10",
-  "description": "Search, retrieve saved items, download authenticated files, export case ZIP packages, publish, and edit Agent Case Share content through MCP.",
+  "version": "1.0.11",
+  "description": "Search, retrieve saved items, download authenticated files, export case ZIP packages, and publish Agent Case Share cases, environments, and Sessions through MCP.",
   "author": {
     "name": "parkerluxu",
     "url": "https://github.com/parkerluxu"
@@ -13,14 +13,15 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Agent Case Share",
-    "shortDescription": "Search, retrieve saved items, and publish content.",
-    "longDescription": "Search and automatically retrieve public, saved, and personal Agent Case Share content through MCP, then publish or edit cases, external case videos, case attachments, articles, Markdown images, reusable assets, and user-editable metadata from AI coding agents.",
+    "shortDescription": "Search, retrieve saved items, and publish case records.",
+    "longDescription": "Search and automatically retrieve public, saved, and personal Agent Case Share content through MCP, then publish or edit cases, immutable Agent environment snapshots, explicit Session transcripts, external case videos, case attachments, articles, Markdown images, reusable assets, and user-editable metadata from AI coding agents.",
     "developerName": "parkerluxu",
     "category": "Productivity",
     "capabilities": ["Write"],
     "websiteURL": "https://github.com/parkerluxu/agent-case-share-skills",
     "defaultPrompt": [
       "Use Agent Case Share to draft a hidden case.",
+      "Add an Agent environment snapshot and explicit Session transcript to my case.",
       "Add this external video to my case.",
       "Publish this Markdown article as a draft.",
       "Upload these reusable assets to a case.",

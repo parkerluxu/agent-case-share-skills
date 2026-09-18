@@ -1,6 +1,6 @@
 # Agent Case Share Skill
 
-Reusable AI-agent skills for searching, reading saved and personal Agent Case Share content, publishing, and editing cases, case videos, case attachments, and reusable assets through MCP.
+Reusable AI-agent skills for searching, reading saved and personal Agent Case Share content, publishing, and editing cases, immutable Agent environment snapshots, explicit Session transcripts, case videos, case attachments, and reusable assets through MCP.
 
 ## Install
 

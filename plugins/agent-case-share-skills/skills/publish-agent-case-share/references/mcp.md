@@ -19,6 +19,8 @@ This reference documents the connected MCP write tools. It intentionally omits d
 | `upload_asset` | `title`, `type`; optional `purpose`, file, and metadata | Prepare an attachment/reusable asset for a new case or upload an asset |
 | `upload_user_asset` | `title`, `type`, `fileBase64`, `fileName`; optional metadata | Upload a standalone user asset |
 | `update_asset` | `id`; optional `title`, `summary`, `version`, `type`, and visibility/status | Update an owned reusable asset or attachment metadata |
+| `create_case_environment` | `caseSlug`, `name`, `platform`, `schemaVersion: "agent-environment/v1"`, `manifest`; optional version, model, and summary | Create an immutable, redacted Agent environment snapshot on an existing user-owned case |
+| `upload_case_session` | `caseSlug`, `title`, `platform`, `transcript`; optional format, linked environment, model, summary, timestamps, and metadata | Upload an explicit Markdown or JSONL Session transcript to an existing user-owned case |
 
 Supported asset types are `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, and `OTHER`. `purpose` is `ATTACHMENT` or `REUSABLE`; omit it only when the default `REUSABLE` behavior is intended. Visibility/status values are `DRAFT`, `PUBLISHED`, and `HIDDEN` where accepted by the tool.
 
@@ -77,3 +79,11 @@ Accepted uploaded file extensions are `.zip`, `.md`, `.txt`, `.json`, `.yaml`, `
 - Read local files only to provide Base64, filename, and MIME type to upload tools. Never include credentials in content.
 
 Only case-attachment and case-video deletion are exposed. Do not emulate deletion of cases, articles, or reusable assets with another protocol. If MCP is disconnected, a tool is missing, or authentication fails, stop before writing and ask the user to connect or reconfigure MCP.
+
+## Agent environment and Session workflow
+
+- `create_case_environment` requires `caseSlug`, `name` (maximum 160 characters), lowercase-normalized `platform` (maximum 80 characters), literal `schemaVersion: "agent-environment/v1"`, and an object `manifest`. Optional `platformVersion` and `modelId` are at most 160 characters; optional `summary` is at most 2,000 characters.
+- A manifest may include `agent`, `model`, `mcpServers`, `skills`, and runtime details. When present, `manifest.agent.platform` must equal `platform`; when both are present, `manifest.model.modelId` must equal `modelId`. The server normalizes the manifest, redacts sensitive values, and computes the fingerprint. It is an immutable snapshot: create another snapshot to record a later configuration.
+- `upload_case_session` requires `caseSlug`, `title` (maximum 200 characters), `platform` (maximum 80 characters), and non-empty `transcript` text (maximum 1,000,000 characters). `transcriptFormat` is `markdown` (default) or `jsonl`; JSONL should have one JSON object per line. Optional `environmentId` must be an environment belonging to the same case. Optional `modelId`, `summary`, `startedAt`, `endedAt`, and object `metadata` are accepted; timestamps must be valid and ordered.
+- MCP forces both new environment snapshots and Sessions to `HIDDEN`. It cannot read an Agent host's history automatically and accepts no raw-file field, so send only explicitly authorized transcript text. It has no environment or Session update/delete write tools.
+- Redact API keys, tokens, passwords, cookies, private keys, full environment-variable values, private endpoints, and unrelated personal data before writing. Service-side redaction can report warnings but does not make secret upload appropriate.
