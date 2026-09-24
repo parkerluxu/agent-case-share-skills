@@ -1,7 +1,7 @@
 {
   "name": "agent-case-share-skills",
-  "description": "Search, retrieve saved items, download authenticated files, export case ZIP packages, and publish Agent Case Share cases, environments, and Sessions through MCP.",
-  "version": "1.0.11",
+  "description": "Search, retrieve saved items and public community discussions, download authenticated files, export case ZIP packages, and publish Agent Case Share content through MCP.",
+  "version": "1.0.12",
   "author": {
     "name": "parkerluxu"
   },

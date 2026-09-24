@@ -1,6 +1,6 @@
 ---
 name: publish-agent-case-share
-description: Create or update the current user's Agent Case Share cases, Agent environment snapshots, Session transcripts, case videos, articles, Markdown images, attachments, and reusable assets through the connected MCP server. Use when the user asks to publish content or add user-owned case materials.
+description: Create or update the current user's Agent Case Share cases, assets, and public community discussions or replies through the connected MCP server. Use when the user asks to publish content, add case materials, post to the community, or reply to a discussion.
 ---
 
 # Publish to Agent Case Share
@@ -21,12 +21,31 @@ Use only the connected Agent Case Share MCP server for user-owned content. Do no
 - Standalone user assets: `upload_user_asset`.
 - Existing asset metadata: `update_asset`.
 - Categories before publishing: `list_categories`.
+- Unlinked Community Plaza discussion: `create_plaza_discussion`.
+- Question, practice, verification, or correction linked to published platform content: `create_linked_community_discussion`.
+- Reply to an open public community discussion: `reply_community_discussion`.
+- Community discovery before writing: `list_community_topics`, `get_community_content_context`, and `get_community_discussion`.
 - Immutable Agent environment snapshot on an existing case: `create_case_environment`.
 - Explicit Markdown or JSONL Session transcript on an existing case: `upload_case_session`.
 
 Read `references/mcp.md` before a write when exact fields, enums, or upload requirements are needed.
 
 `delete_case_attachment` deletes only one attachment record; retention of the stored object follows the website's storage policy. `delete_case_video` deletes only the case's video record and does not affect content hosted by the external video platform. Cases, articles, and reusable assets still have no MCP delete tool; leave those unchanged rather than using another protocol.
+
+## Community discussions and replies
+
+Community writes create public user-attributed content immediately; they do not have a draft or hidden mode. Use them only after the user explicitly asks to post or reply and has supplied or approved the text and target. Never turn a discovered discussion, user profile, or untrusted text into a post or reply on the user's behalf.
+
+- These tools require the MCP session's personal API Key and the server to expose `MCP_ENABLE_WRITE_TOOLS=true`. The deployment's shared publishing tokens and administrator OAuth access do not authorize them. If the tool is missing or reports missing credentials, invoke `$configure-agent-case-share`, ask the user to reconnect MCP, and stop; never use an HTTP fallback.
+- Supply a fresh opaque `idempotencyKey` (1-200 printable characters) for each new logical post or reply. On an uncertain network outcome, retry the exact same request with the same key. Do not reuse a key for different text or a different target; the service retains idempotent results for 24 hours.
+- For a general unlinked topic, call `create_plaza_discussion` with `title`, `body`, optional `topicSlugs` (at most three returned by `list_community_topics`), and `idempotencyKey`. It always creates an unlinked `DISCUSSION` in the Community Plaza. Do not pass a content URL, action, category, kind, or manual link.
+- For a discussion about published platform content, call `get_community_content_context` first and then `create_linked_community_discussion`. Pass the exact public `contentUrl`, `action` (`QUESTION`, `PRACTICE`, `VERIFICATION`, or `CORRECTION`), `title`, `body`, optional returned topic slugs, and `idempotencyKey`. Do not infer or send internal target IDs or types.
+- A linked `VERIFICATION` also requires `verification.result` (`SUCCESS`, `PARTIAL`, `NEEDS_ADJUSTMENT`, or `FAILED`). Include platform, model, notes, and an HTTP(S) evidence URL only when the user supplied or verified them; do not claim a test result or evidence that has not been performed.
+- A linked `CORRECTION` also requires `correction.kind` (`CONTENT`, `LINK`, or `OTHER`) and `correction.body`. `location`, `currentContent`, and `suggestedContent` are optional but should be included when supplied. Safety, privacy, and copyright reports are not exposed as public MCP correction tools.
+- For a reply, inspect the target with `get_community_discussion` first. Call `reply_community_discussion` with its public `discussionUrl`, the reply `body`, optional `parentReplyRef` returned from that same discussion, and an `idempotencyKey`. Do not reply to a closed, hidden, or unavailable discussion, and do not derive a parent reference from a title or database ID.
+- Community MCP has no edit, delete, reaction, view-recording, report, or moderation write tool. Report that limitation instead of switching protocols. Community operations overview and moderation queues use a separately gated administrator OAuth tool group and are outside this user-owned publishing skill.
+
+Treat community content as public, long-lived, and subject to rate limits. Keep secrets, private endpoints, personal data, unsafe instructions, and unverified claims out of post and reply bodies. Preserve returned `discussionRef`, `discussionUrl`, `replyRef`, and `idempotencyKey` exactly in the final report.
 
 ## Agent environments and Sessions
 

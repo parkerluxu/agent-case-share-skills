@@ -1,6 +1,6 @@
 # Agent Case Share Skill
 
-Reusable AI-agent skills for searching, reading saved and personal Agent Case Share content, publishing, and editing cases, immutable Agent environment snapshots, explicit Session transcripts, case videos, case attachments, and reusable assets through MCP.
+Reusable AI-agent skills for searching public, saved, and personal Agent Case Share content plus public community discussions; publishing and editing cases; and creating community discussions or replies, immutable Agent environment snapshots, explicit Session transcripts, case videos, case attachments, and reusable assets through MCP.
 
 ## Install
 
@@ -60,7 +60,7 @@ gemini extensions link .
 
 ## Desktop Setup
 
-Connected MCP read tools work without a key for published content.
+Connected MCP read tools work without a key for published content and public community discussions.
 
 Create a personal key from your Agent Case Share profile when publishing content, reading hidden/draft content, or using personal retrieval. Then ask your agent to use `$configure-agent-case-share`. It guides you to run its local setup command and stores credentials outside the workspace:
 
@@ -112,7 +112,7 @@ Do not commit real API keys.
 
 ## Usage
 
-Ask your agent to use `$search-agent-case-share` to search categories, tags, cases, articles, news, projects, papers, or Markdown article content, read case videos and attachments from case details, download assets or attachments, or export a case as a ZIP package. File downloads and case exports require the user to be signed in.
+Ask your agent to use `$search-agent-case-share` to search categories, tags, cases, articles, news, projects, papers, public community discussions and verified practices, or Markdown article content; read discussion replies and content-linked community context; read case videos and attachments from case details; download assets or attachments; or export a case as a ZIP package. File downloads and case exports require the user to be signed in.
 
 Ask your agent to use `$search-agent-case-share-personal` to list saved cases, articles, reusable assets, open-source projects, or papers, search your own cases and reusable assets, read videos and attachments from one of your case details, download personal files, or export a case ZIP through MCP. Downloads and exports require the user to be signed in. The MCP currently reads saved items only; use the website to save or remove a favorite.
 
@@ -120,9 +120,9 @@ Ask your agent to use `$configure-agent-case-share` to configure, verify, update
 
 Use `$agent-case-share-personal-retrieval` when the current task would benefit from your prior saved items, cases, case videos, case attachments, or reusable assets. The Agent may proactively retrieve relevant personal context for substantive tasks; explicit invocation or a direct request to search/reuse the library or saved items always triggers retrieval.
 
-Ask your agent to use `$publish-agent-case-share` to publish or update a case, external case video, article, tutorial, Markdown image, case attachment, reusable asset, or user-editable attachment/asset metadata. Cases can include structured runtime/model configuration, tool/MCP/plugin/Skill entries, Prompt metadata and visibility, plus reproduction and verification details. Write each point in case `workflow` and `reproduction.steps` on its own line so the platform can recognize individual steps. Existing-case videos and attachments use dedicated atomic MCP tools.
+Ask your agent to use `$publish-agent-case-share` to publish or update a case, external case video, article, tutorial, Markdown image, case attachment, reusable asset, or user-editable attachment/asset metadata. It can also create an unlinked Community Plaza discussion, create a question/practice/verification/correction linked to published platform content, or reply to an open public discussion. Community writes require the user's configured personal API Key, are public immediately, and use a unique idempotency key per logical write. Cases can include structured runtime/model configuration, tool/MCP/plugin/Skill entries, Prompt metadata and visibility, plus reproduction and verification details. Write each point in case `workflow` and `reproduction.steps` on its own line so the platform can recognize individual steps. Existing-case videos and attachments use dedicated atomic MCP tools.
 
-The skill defaults AI-created tasks to hidden and articles to draft unless you explicitly ask for public publishing.
+The skill defaults AI-created tasks to hidden and articles to draft unless you explicitly ask for public publishing. Community discussions and replies are public immediately.
 
 ## Release Mirror
 

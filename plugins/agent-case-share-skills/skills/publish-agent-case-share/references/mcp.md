@@ -22,6 +22,25 @@ This reference documents the connected MCP write tools. It intentionally omits d
 | `create_case_environment` | `caseSlug`, `name`, `platform`, `schemaVersion: "agent-environment/v1"`, `manifest`; optional version, model, and summary | Create an immutable, redacted Agent environment snapshot on an existing user-owned case |
 | `upload_case_session` | `caseSlug`, `title`, `platform`, `transcript`; optional format, linked environment, model, summary, timestamps, and metadata | Upload an explicit Markdown or JSONL Session transcript to an existing user-owned case |
 
+## Community discussion writes
+
+These write tools are registered only when the connected MCP session has the current user's personal API Key and `MCP_ENABLE_WRITE_TOOLS=true`. They create public content immediately, require `idempotencyKey` for every logical write, and must never fall back to website HTTP endpoints. A key is 1-200 printable characters; reuse it only when retrying the exact same write after an uncertain outcome. The service replays the original result for 24 hours and rejects a reused key with a different body or target.
+
+| Tool | Required/important fields | Use |
+| --- | --- | --- |
+| `create_plaza_discussion` | `title` (1-200 chars), `body` (1-20,000 chars), optional `topicSlugs` (at most 3), `idempotencyKey` | Create one unlinked Community Plaza discussion |
+| `create_linked_community_discussion` | public `contentUrl`, `action`, `title`, `body`, optional `topicSlugs` (at most 3), action-specific `verification` or `correction`, `idempotencyKey` | Create a discussion tied to one supported published content item |
+| `reply_community_discussion` | public `discussionUrl`, `body` (1-20,000 chars), optional `parentReplyRef`, `idempotencyKey` | Create a reply or child reply on one open public discussion |
+
+- Before using a topic slug, call `list_community_topics`. Use `get_community_content_context` before creating a linked discussion to confirm the supplied public content URL is supported and to inspect prior discussions. Use `get_community_discussion` before replying and take any `parentReplyRef` only from that discussion's returned reply page.
+- `create_plaza_discussion` is intentionally fixed to an unlinked `DISCUSSION` in the Community Plaza. Do not include a content URL, action, category, kind, links, target type, or target ID.
+- `create_linked_community_discussion.action` is `QUESTION`, `PRACTICE`, `VERIFICATION`, or `CORRECTION`. Its `contentUrl` must identify a published `/tasks/:slug`, `/articles/:slug`, `/assets/:id`, `/projects/:slug`, `/papers/:slug`, or `/events/:slug` record. Do not substitute an internal ID or fabricate a target from a title.
+- `VERIFICATION` requires `verification.result`: `SUCCESS`, `PARTIAL`, `NEEDS_ADJUSTMENT`, or `FAILED`. Its optional `platform`, `model`, `notes`, and HTTP(S) `evidenceUrl` must be factual and user-authorized.
+- `CORRECTION` requires `correction.kind`: `CONTENT`, `LINK`, or `OTHER`, plus non-empty `correction.body`. `location`, `currentContent`, and `suggestedContent` are optional. Public MCP correction does not accept `SAFETY`, `PRIVACY`, or `COPYRIGHT` kinds.
+- Replies accept a public URL matching `/community/discussions/:discussionRef`, not an internal ID. The optional `parentReplyRef` must identify a visible reply in the same discussion. Closed, hidden, or unavailable discussions reject new replies.
+
+Successful discussion writes return `discussionRef`, `discussionUrl`, `created`, and `idempotencyKey`; replies return `replyRef`, `discussionUrl`, `created`, and `idempotencyKey`. Keep these opaque values unchanged. Common errors include `UNAUTHENTICATED`, `RATE_LIMITED`, `INVALID_CONTENT_URL`, `INVALID_ACTION`, `INVALID_TOPIC`, `DISCUSSION_CLOSED`, and `IDEMPOTENCY_CONFLICT`. Community discussion/reply update, delete, reaction, view, report, and moderation writes are not available through MCP.
+
 Supported asset types are `SKILL`, `PROMPT`, `WORKFLOW`, `TEMPLATE`, `MCP_CONFIG`, and `OTHER`. `purpose` is `ATTACHMENT` or `REUSABLE`; omit it only when the default `REUSABLE` behavior is intended. Visibility/status values are `DRAFT`, `PUBLISHED`, and `HIDDEN` where accepted by the tool.
 
 ## Case and article creation fields
