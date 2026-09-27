@@ -1,6 +1,6 @@
 # Agent Case Share Skill
 
-Reusable AI-agent skills for searching public, saved, and personal Agent Case Share content plus public community discussions; publishing and editing cases; and creating community discussions or replies, immutable Agent environment snapshots, explicit Session transcripts, case videos, case attachments, and reusable assets through MCP.
+Reusable AI-agent skills for searching public, saved, and personal Agent Case Share content plus public community discussions; publishing and editing cases; capturing selected Agent environments and Sessions; and creating community discussions or replies, immutable Agent environment snapshots, Session transcripts, case videos, case attachments, and reusable assets through MCP.
 
 ## Install
 
@@ -22,6 +22,7 @@ cp -R plugins/agent-case-share-skills/skills/search-agent-case-share ~/.codex/sk
 cp -R plugins/agent-case-share-skills/skills/search-agent-case-share-personal ~/.codex/skills/
 cp -R plugins/agent-case-share-skills/skills/agent-case-share-personal-retrieval ~/.codex/skills/
 cp -R plugins/agent-case-share-skills/skills/configure-agent-case-share ~/.codex/skills/
+cp -R plugins/agent-case-share-skills/skills/capture-agent-case-share ~/.codex/skills/
 ```
 
 ### Claude Code
@@ -42,6 +43,7 @@ cp -R plugins/agent-case-share-skills/skills/search-agent-case-share ~/.claude/s
 cp -R plugins/agent-case-share-skills/skills/search-agent-case-share-personal ~/.claude/skills/
 cp -R plugins/agent-case-share-skills/skills/agent-case-share-personal-retrieval ~/.claude/skills/
 cp -R plugins/agent-case-share-skills/skills/configure-agent-case-share ~/.claude/skills/
+cp -R plugins/agent-case-share-skills/skills/capture-agent-case-share ~/.claude/skills/
 ```
 
 ### Gemini CLI
@@ -117,6 +119,17 @@ Ask your agent to use `$search-agent-case-share` to search categories, tags, cas
 Ask your agent to use `$search-agent-case-share-personal` to list saved cases, articles, reusable assets, open-source projects, or papers, search your own cases and reusable assets, read videos and attachments from one of your case details, download personal files, or export a case ZIP through MCP. Downloads and exports require the user to be signed in. The MCP currently reads saved items only; use the website to save or remove a favorite.
 
 Ask your agent to use `$configure-agent-case-share` to configure, verify, update, or clear local Agent Case Share credentials.
+
+Ask your agent to use `$capture-agent-case-share` to save an environment, a current or selected historical Session, or both to your case. You can choose the date interval, user turns, tool-record inclusion, environment fields, titles, and an existing environment association. Local export/preview is supported without an account or MCP connection. Explicit source paths are converted using a bundled Python 3.11+ script with no third-party dependencies; native Codex and Claude Code JSONL, generic JSONL/Markdown, and supplied environment manifests are supported. Other host formats can be adapted to generic exports. Capture does not promise access to private history unavailable to the host.
+
+Examples:
+
+- "Save only this Session to my case at <case URL>, without the environment."
+- "Upload only my project environment to <case URL>, including the model and MCP servers."
+- "Archive this Session and its environment to <case URL>."
+- "Export turns 2 through 5 locally, keeping only user and assistant messages. Do not upload."
+
+The Agent removes sensitive content before a requested upload and honors the selected scope. Both environment and Session MCP uploads create hidden records. Current configuration is labeled separately from historical Session evidence; configured integrations are not claimed as actually used. Oversized transcripts remain intact locally and are not silently truncated to fit the MCP limit.
 
 Use `$agent-case-share-personal-retrieval` when the current task would benefit from your prior saved items, cases, case videos, case attachments, or reusable assets. The Agent may proactively retrieve relevant personal context for substantive tasks; explicit invocation or a direct request to search/reuse the library or saved items always triggers retrieval.
 

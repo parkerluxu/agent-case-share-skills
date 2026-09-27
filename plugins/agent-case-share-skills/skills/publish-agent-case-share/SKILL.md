@@ -49,6 +49,8 @@ Treat community content as public, long-lived, and subject to rate limits. Keep 
 
 ## Agent environments and Sessions
 
+For requests to collect or convert local Agent configuration or current/historical conversation logs, use `capture-agent-case-share` when available. It handles environment-only, Session-only, combined capture, custom selection, and local export. Preserve the user's selected scope. Continue here for an explicit manifest/transcript that already needs only uploading; the capture skill is not required for those writes.
+
 Use these tools only for an existing case owned by the current user, after the user asks to preserve the relevant environment or conversation. They require the connected MCP server to expose authenticated write tools. Never use a JSON API or a host-specific workaround when either MCP tool is unavailable.
 
 - Create a snapshot with `create_case_environment`. It requires `caseSlug`, `name`, `platform`, `schemaVersion: "agent-environment/v1"`, and a JSON-object `manifest`; `platformVersion`, `modelId`, and `summary` are optional. Include only environment facts that are available in the current task or explicitly supplied by the user. A useful manifest can contain `agent`, `model`, `mcpServers`, `skills`, and runtime details, but it must not contain secrets.

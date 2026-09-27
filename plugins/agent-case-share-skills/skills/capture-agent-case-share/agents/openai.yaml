@@ -1,0 +1,9 @@
+interface:
+  display_name: "Capture Agent Case Share"
+  short_description: "Save selected environments and Sessions to your cases."
+  default_prompt: "Use $capture-agent-case-share to save this Session and its environment to my case, honoring my selected scope."
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "agent-case-share"
+      description: "Agent Case Share MCP server for requested uploads"
